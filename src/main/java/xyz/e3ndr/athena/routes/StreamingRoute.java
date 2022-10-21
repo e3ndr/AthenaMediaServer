@@ -61,9 +61,8 @@ public class StreamingRoute implements HttpProvider {
             .putHeader("Content-Disposition", String.format("filename=\"%s.%s\"", media.getId(), containerFormat.name().toLowerCase()));
 
         ReflectionLib.setValue(resp, "content", new ResponseContent<Void>() {
-            @SneakyThrows
             @Override
-            public void write(OutputStream out) throws IOException {
+            public void write(OutputStream out) {
                 try (video) {
                     byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
                     int read = 0;
@@ -72,7 +71,7 @@ public class StreamingRoute implements HttpProvider {
                         out.write(buffer, 0, read);
                         out.flush();
                     }
-                }
+                } catch (IOException ignored) {}
             }
 
             @Override
