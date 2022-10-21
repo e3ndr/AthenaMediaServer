@@ -56,7 +56,7 @@ public class StreamingRoute implements HttpProvider {
             streamIds
         );
 
-        String mimeType = String.format("video/%s; codecs=\"%s, %s\"", containerFormat.name(), videoCodec.name(), audioCodec.name()).toLowerCase();
+        String mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
 
         HttpResponse resp = HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, HttpResponse.EMPTY_BODY)
             .setMimeType(mimeType);
