@@ -9,6 +9,7 @@ public enum VideoCodec {
     HEVC  ("hevc", "hevc_nvenc"),
     SPARK ("flv1", null),
     THEORA("libtheora", null),
+    VP8   ("vp8", null),
     // @formatter:on
 
     ;
