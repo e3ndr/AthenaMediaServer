@@ -16,7 +16,7 @@ public enum VideoQuality {
 
     ;
 
-    public final int width;
+    public final int max;
 
     /** KBPS */
     public final int bitrate;
