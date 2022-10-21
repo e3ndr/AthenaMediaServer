@@ -24,10 +24,11 @@ import xyz.e3ndr.reflectionlib.ReflectionLib;
 public class StreamingRoute implements HttpProvider {
 
     @SneakyThrows
-    @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream")
+    @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/raw")
     public HttpResponse onStream(SoraHttpSession session) {
         Map<String, String> query = session.getQueryParameters();
 
+        // Parameters.
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
         long startAt = Long.parseLong(query.getOrDefault("startAt", "0"));
@@ -49,29 +50,33 @@ public class StreamingRoute implements HttpProvider {
             streamIds = media.getFiles().getStreams().getDefaultStreams();
         }
 
-        InputStream video = Athena.startStream(
+        // Video
+        InputStream videoInputStream = Athena.startStream(
             media,
             startAt,
             videoQuality, videoCodec, audioCodec, containerFormat,
             streamIds
         );
 
+        // Response.
         String mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
         if (containerFormat == ContainerFormat.MKV) {
             mimeType = mimeType.replace("mkv", "x-matroska");
         }
 
-        HttpResponse resp = HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, HttpResponse.EMPTY_BODY)
+        HttpResponse resp = HttpResponse
+            .newFixedLengthResponse(StandardHttpStatus.OK, HttpResponse.EMPTY_BODY)
             .setMimeType(mimeType);
 
+        // Intercept the OutputStream.
         ReflectionLib.setValue(resp, "content", new ResponseContent<Void>() {
             @Override
             public void write(OutputStream out) {
-                try (video) {
+                try (videoInputStream) {
                     byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
                     int read = 0;
 
-                    while ((read = video.read(buffer)) != -1) {
+                    while ((read = videoInputStream.read(buffer)) != -1) {
                         out.write(buffer, 0, read);
                         out.flush();
                     }
@@ -95,6 +100,37 @@ public class StreamingRoute implements HttpProvider {
         });
 
         return resp;
+    }
+
+    @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/html5")
+    public HttpResponse onStreamHtml(SoraHttpSession session) {
+        return HttpResponse
+            .newFixedLengthResponse(
+                StandardHttpStatus.OK,
+                String.format(
+                    "<!DOCTYPE html>\r\n"
+                        + "<html>\r\n"
+                        + "    <style>\r\n"
+                        + "        body {\r\n"
+                        + "            margin: 0;\r\n"
+                        + "            width: 100%%;\r\n"
+                        + "            height: 100%%;\r\n"
+                        + "            overflow: hidden;\r\n"
+                        + "            background-color: black;\r\n"
+                        + "        }\r\n"
+                        + "        \r\n"
+                        + "        video {\r\n"
+                        + "            width: 100%%;\r\n"
+                        + "            height: 100%%;\r\n"
+                        + "            object-fit: contain;\r\n"
+                        + "        }\r\n"
+                        + "    </style>\r\n"
+                        + "    <video src=\"raw%s\" controls></video>\r\n"
+                        + "</html>",
+                    session.getQueryString()
+                )
+            )
+            .setMimeType("text/html");
     }
 
 }
