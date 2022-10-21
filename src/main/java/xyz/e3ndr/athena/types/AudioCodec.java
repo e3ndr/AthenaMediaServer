@@ -6,10 +6,11 @@ import lombok.AllArgsConstructor;
 public enum AudioCodec {
     SOURCE("copy"),
 
-    AAC("aac"),
-    MP3("mp3"),
+    // @formatter:off
+    AAC ("aac"),
+    MP3 ("mp3"),
     OPUS("libopus"),
-
+    // @formatter:on
     ;
 
     public final String ff;
