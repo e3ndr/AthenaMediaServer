@@ -81,7 +81,7 @@ public class Athena {
 
             // https://trac.ffmpeg.org/wiki/Scaling
             command.add("-vf");
-            command.add(String.format("scale='%d:-1'", desiredQuality.width, desiredQuality.width));
+            command.add(String.format("scale='min(%d,iw)':'min(%d,ih)'", desiredQuality.max, desiredQuality.max));
         }
 
         /* ---- Format & Output ---- */
