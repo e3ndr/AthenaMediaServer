@@ -8,6 +8,7 @@ public enum AudioCodec {
 
     AAC("aac"),
     MP3("mp3"),
+    OPUS("libopus"),
 
     ;
 

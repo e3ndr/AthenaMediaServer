@@ -7,6 +7,7 @@ public enum VideoCodec {
     H264("h264", "h264_nvenc"),
     HEVC("hevc", "hevc_nvenc"),
     SORENSON_SPARK("flv1", null),
+    THEORA("libtheora", null),
 
     ;
 
