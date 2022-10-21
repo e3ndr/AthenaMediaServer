@@ -1,0 +1,21 @@
+.DS_Store
+
+# IntelliJ
+*.iml
+.idea/
+
+# Eclipse
+.settings/
+.project
+.classpath
+
+# VSCode
+.vscode/settings.json
+
+# Common
+*target/
+*.versionsBackup
+
+# Misc
+*Test.java
+config.json
