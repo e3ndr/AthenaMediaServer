@@ -57,6 +57,9 @@ public class StreamingRoute implements HttpProvider {
         );
 
         String mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
+        if (containerFormat == ContainerFormat.MKV) {
+            mimeType = mimeType.replace("mkv", "x-matroska");
+        }
 
         HttpResponse resp = HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, HttpResponse.EMPTY_BODY)
             .setMimeType(mimeType);
