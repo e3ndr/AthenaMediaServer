@@ -6,9 +6,15 @@ import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
+import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.rakurai.json.Rson;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
@@ -23,8 +29,13 @@ public class Athena {
     public static final int STREAMING_BUFFER_SIZE = 64/*kb*/ * 1000;
 
     public static File mediaDirectory;
-
     public static boolean enableCudaAcceleration;
+
+    private static Map<String, PlaybackSession> sessions = new ConcurrentHashMap<>();
+
+    public List<PlaybackSession> getSessions() {
+        return new ArrayList<>(sessions.values());
+    }
 
     public static Media getMedia(String mediaId) throws IOException {
         File mediaIndexFile = new File(mediaDirectory, mediaId.concat("/index.json"));
@@ -95,13 +106,43 @@ public class Athena {
 
         Process proc = new ProcessBuilder()
             .command(command)
-            .redirectError(Redirect.INHERIT)
+            .redirectError(Redirect.PIPE)
             .redirectInput(Redirect.PIPE)
             .redirectOutput(Redirect.PIPE)
             .start();
 
-        InputStream videoStream = proc.getInputStream();
+        /* ---- Session & Analytics ---- */
+        PlaybackSession session = new PlaybackSession();
+        sessions.put(session.id, session);
+        session.logger.info("Session started.");
 
+        proc
+            .onExit()
+            .whenComplete((_1, _2) -> {
+                sessions.remove(session.id);
+                session.logger.info("Session ended.");
+            });
+
+        {
+            AsyncTask.create(() -> {
+                Scanner stdout = new Scanner(proc.getErrorStream());
+
+                try {
+                    String line = null;
+                    while ((line = stdout.nextLine()) != null) {
+                        if (line.startsWith("frame=")) {
+                            session.parseAndUpdate(line);
+                            session.logger.info("Analytics: %s", session);
+                        }
+
+                        session.logger.debug(line);
+                    }
+                } catch (NoSuchElementException ignored) {}
+            });
+        }
+
+        /* ---- Result ---- */
+        InputStream videoStream = proc.getInputStream();
         return new InputStream() {
 
             @Override
