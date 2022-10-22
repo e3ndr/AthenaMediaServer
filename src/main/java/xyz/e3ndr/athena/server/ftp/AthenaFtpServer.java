@@ -40,7 +40,7 @@ public class AthenaFtpServer implements AthenaServer {
                     int dataPort = openPorts.remove(0); // Passive mode port.
 
                     // Create new worker thread for new connection
-                    Worker w = new Worker(client, dataPort);
+                    FtpClient w = new FtpClient(client, dataPort);
                     w.start();
                 } catch (IOException e) {
                     FastLogger.logStatic(LogLevel.SEVERE, "Unable to accept new connection:\n%s", e);

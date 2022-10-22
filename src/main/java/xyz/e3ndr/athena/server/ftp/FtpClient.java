@@ -16,7 +16,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
  * 
  * @author Moritz Stueckler
  */
-public class Worker extends Thread implements Closeable {
+class FtpClient extends Thread implements Closeable {
     // Path information
     private String currDirectory;
 
@@ -40,7 +40,7 @@ public class Worker extends Thread implements Closeable {
 
     private FastLogger logger;
 
-    public Worker(Socket client, int dataPort) throws IOException {
+    public FtpClient(Socket client, int dataPort) throws IOException {
         this.dataPort = dataPort;
         this.controlSocket = client;
 
