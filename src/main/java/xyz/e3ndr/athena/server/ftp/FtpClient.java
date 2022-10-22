@@ -307,21 +307,25 @@ class FtpClient extends Thread implements Closeable {
             String value = splitPart[1].toUpperCase();
 
             switch (key) {
+                case "f":
                 case "format": {
                     this.containerFormat = ContainerFormat.valueOf(value);
                     break;
                 }
 
+                case "q":
                 case "quality": {
                     this.videoQuality = VideoQuality.valueOf(value);
                     break;
                 }
 
+                case "vc":
                 case "videocodec": {
                     this.videoCodec = VideoCodec.valueOf(value);
                     break;
                 }
 
+                case "ac":
                 case "audiocodec": {
                     this.audioCodec = AudioCodec.valueOf(value);
                     break;
