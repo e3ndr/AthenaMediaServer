@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.routes;
+package xyz.e3ndr.athena.server.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +21,7 @@ import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.reflectionlib.ReflectionLib;
 
-public class StreamingRoute implements HttpProvider {
+class StreamingRoute implements HttpProvider {
 
     @SneakyThrows
     @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/raw")

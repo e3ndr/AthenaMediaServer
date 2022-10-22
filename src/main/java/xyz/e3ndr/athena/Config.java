@@ -17,7 +17,9 @@ public class Config {
 
     private boolean enableCudaAcceleration;
 
-    private int port = 8080;
+    // -1 to disable.
+    private int httpPort = 8080;
+
 
     public File getMediaDirectory() {
         return new File(this.mediaDirectory);

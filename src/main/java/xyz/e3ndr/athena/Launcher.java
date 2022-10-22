@@ -3,11 +3,9 @@ package xyz.e3ndr.athena;
 import java.io.File;
 import java.nio.file.Files;
 
-import co.casterlabs.rakurai.io.http.server.HttpServerImplementation;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
-import co.casterlabs.sora.SoraFramework;
-import co.casterlabs.sora.SoraLauncher;
+import xyz.e3ndr.athena.server.http.AthenaHttpServer;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -57,16 +55,7 @@ public class Launcher {
 
         Files.writeString(configFile.toPath(), Rson.DEFAULT.toJson(config).toString(true));
 
-        SoraFramework framework = new SoraLauncher()
-            .setPort(config.getPort())
-            .setImplementation(HttpServerImplementation.UNDERTOW)
-            .buildWithoutPluginLoader();
-
-        framework
-            .getSora()
-            .register(new AthenaSoraAdapter());
-
-        framework.startHttpServer();
+        new AthenaHttpServer().start(config);
     }
 
 }
