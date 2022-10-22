@@ -471,10 +471,10 @@ class FtpClient extends Thread implements Closeable {
      * Handler for the TYPE command. The type command sets the transfer mode to
      * either binary or ascii mode
      * 
-     * @param mode Transfer mode: "a" for Ascii. "i" for Image (Binary).
+     * @param mode Transfer mode: "A" for Ascii. "I" for Image (Binary).
      */
     private void command_TYPE(String mode) {
-        switch (mode.toLowerCase()) {
+        switch (mode.toUpperCase()) {
             case "A": {
                 this.transferMode = TransferType.ASCII;
                 this.sendMessage(200, "OK");
