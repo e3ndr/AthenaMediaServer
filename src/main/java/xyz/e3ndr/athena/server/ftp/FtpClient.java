@@ -81,6 +81,11 @@ class FtpClient extends Thread implements Closeable {
             while (this.doControlLoop) {
                 String line = this.controlIn.readLine();
 
+                if (line == null) {
+                    this.doControlLoop = false;
+                    break;
+                }
+
                 this.onCommand(line);
             }
         } catch (Exception e) {
