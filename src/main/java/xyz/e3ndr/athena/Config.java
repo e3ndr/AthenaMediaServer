@@ -19,7 +19,7 @@ public class Config {
 
     // -1 to disable.
     private int httpPort = 8080;
-
+    private int ftpPort = 1025;
 
     public File getMediaDirectory() {
         return new File(this.mediaDirectory);

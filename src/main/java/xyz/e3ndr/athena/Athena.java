@@ -168,4 +168,8 @@ public class Athena {
         };
     }
 
+    public static boolean authenticate(String token) {
+        return true; // TODO
+    }
+
 }

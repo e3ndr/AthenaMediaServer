@@ -3,8 +3,10 @@ package xyz.e3ndr.athena;
 import java.io.File;
 import java.nio.file.Files;
 
+import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
+import xyz.e3ndr.athena.server.ftp.AthenaFtpServer;
 import xyz.e3ndr.athena.server.http.AthenaHttpServer;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -55,7 +57,10 @@ public class Launcher {
 
         Files.writeString(configFile.toPath(), Rson.DEFAULT.toJson(config).toString(true));
 
-        new AthenaHttpServer().start(config);
+        Config _pointer = config;
+        AsyncTask.create(() -> new AthenaHttpServer().start(_pointer));
+        AsyncTask.create(() -> new AthenaFtpServer().start(_pointer));
+
     }
 
 }
