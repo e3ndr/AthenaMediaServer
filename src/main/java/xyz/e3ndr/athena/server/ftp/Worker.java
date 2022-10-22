@@ -88,78 +88,78 @@ public class Worker extends Thread implements Closeable {
         // dispatcher mechanism for different commands
         switch (command) {
             case "USER":
-                handleUser(args);
+                command_USER(args);
                 break;
 
             case "PASS":
-                handlePass(args);
+                command_PASS(args);
                 break;
 
             case "CWD":
-                handleCwd(args);
+                command_CWD(args);
                 break;
 
             case "LIST":
-                handleNlst(args);
+                command_NLST(args);
                 break;
 
             case "NLST":
-                handleNlst(args);
+                command_NLST(args);
                 break;
 
             case "PWD":
             case "XPWD":
-                handlePwd();
+                command_PWD();
                 break;
 
             case "QUIT":
-                handleQuit();
+                command_QUIT();
                 break;
 
             case "PASV":
-                handlePasv();
+                command_PASV();
                 break;
 
             case "EPSV":
-                handleEpsv();
+                command_EPSV();
                 break;
 
             case "SYST":
-                handleSyst();
+                command_SYST();
                 break;
 
             case "FEAT":
-                handleFeat();
+                command_FEAT();
                 break;
 
             case "PORT":
-                handlePort(args);
+                command_PORT(args);
                 break;
 
             case "EPRT":
-                handleEPort(args);
+                command_EPORT(args);
                 break;
 
             case "RETR":
-                handleRetr(args);
+                command_RETR(args);
                 break;
 
             case "MKD":
             case "XMKD":
-                handleMkd(args);
+                command_MKD(args);
                 break;
 
             case "RMD":
             case "XRMD":
-                handleRmd(args);
+                command_RMD(args);
                 break;
 
             case "TYPE":
-                handleType(args);
+                command_TYPE(args);
                 break;
 
             case "STOR":
-                handleStor(args);
+                command_STOR(args);
                 break;
 
             default:
@@ -264,7 +264,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param username Username entered by the user
      */
-    private void handleUser(String username) {
+    private void command_USER(String username) {
         switch (this.loginState) {
             case LOGGED_IN:
                 this.sendMessage(530, "User already logged in");
@@ -287,7 +287,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param password Password entered by the user
      */
-    private void handlePass(String password) {
+    private void command_PASS(String password) {
         switch (this.loginState) {
             case ENTERED_USERNAME:
                 if (Athena.authenticate(password)) {
@@ -319,7 +319,7 @@ public class Worker extends Thread implements Closeable {
      * the client initiates the data connection to the server. In active mode the
      * server initiates the data connection to the client.
      */
-    private void handlePasv() {
+    private void command_PASV() {
         // Using fixed IP for connections on the same machine
         // For usage on separate hosts, we'd need to get the local IP address from
         // somewhere
@@ -344,7 +344,7 @@ public class Worker extends Thread implements Closeable {
      * PASV but for newer clients (IPv6 support is possible but not implemented
      * here).
      */
-    private void handleEpsv() {
+    private void command_EPSV() {
         this.sendMessage(229, "Entering Extended Passive Mode (|||%s|)", this.dataPort);
         openDataConnectionPassive(this.dataPort);
     }
@@ -352,7 +352,7 @@ public class Worker extends Thread implements Closeable {
     /**
      * Handler for the QUIT command.
      */
-    private void handleQuit() {
+    private void command_QUIT() {
         this.sendMessage(221, "Closing connection");
         this.doControlLoop = false;
     }
@@ -366,7 +366,7 @@ public class Worker extends Thread implements Closeable {
      *             The last two segments encode the port number (port = seg1*256 +
      *             seg2)
      */
-    private void handlePort(String args) {
+    private void command_PORT(String args) {
         // Extract IP address and port number from arguments
         String[] stringSplit = args.split(",");
         String hostName = stringSplit[0] + "." + stringSplit[1] + "." + stringSplit[2] + "." + stringSplit[3];
@@ -386,7 +386,7 @@ public class Worker extends Thread implements Closeable {
      * @param args This string is separated by vertical bars and encodes the IP
      *             version, the IP address and the port number
      */
-    private void handleEPort(String args) {
+    private void command_EPORT(String args) {
         final String IPV4 = "1";
         final String IPV6 = "2";
 
@@ -412,7 +412,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param mode Transfer mode: "a" for Ascii. "i" for Image (Binary).
      */
-    private void handleType(String mode) {
+    private void command_TYPE(String mode) {
         switch (mode.toLowerCase()) {
             case "A": {
                 this.transferMode = TransferType.ASCII;
@@ -443,7 +443,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param args The directory to be listed
      */
-    private void handleNlst(String args) {
+    private void command_NLST(String args) {
 //        if (dataConnection == null || dataConnection.isClosed()) {
 //            sendMessage("425 No data connection was established");
 //        } else {
@@ -471,7 +471,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param args New directory to be created
      */
-    private void handleCwd(String args) {
+    private void command_CWD(String args) {
 //        String filename = currDirectory;
 //
 //        // go one level up (cd ..)
@@ -502,7 +502,7 @@ public class Worker extends Thread implements Closeable {
      * Handler for PWD (Print working directory) command. Returns the path of the
      * current directory back to the client.
      */
-    private void handlePwd() {
+    private void command_PWD() {
 //        this.sendMessage("257 \"" + currDirectory + "\"");
     }
 
@@ -512,7 +512,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param args Directory name
      */
-    private void handleMkd(String args) {
+    private void command_MKD(String args) {
 //        // Allow only alphanumeric characters
 //        if (args != null && args.matches("^[a-zA-Z0-9]+$")) {
 //            File dir = new File(currDirectory + fileSeparator + args);
@@ -533,7 +533,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param dir directory to be deleted.
      */
-    private void handleRmd(String dir) {
+    private void command_RMD(String dir) {
 //        String filename = currDirectory;
 //
 //        // only alphanumeric folder names are allowed
@@ -561,7 +561,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param file The file to transfer to the user
      */
-    private void handleRetr(String file) {
+    private void command_RETR(String file) {
 //        File f = new File(currDirectory + fileSeparator + file);
 //
 //        if (!f.exists()) {
@@ -660,7 +660,7 @@ public class Worker extends Thread implements Closeable {
      * 
      * @param file The file that the user wants to store on the server
      */
-    private void handleStor(String file) {
+    private void command_STOR(String file) {
 //        if (file == null) {
 //            sendMessage("501 No filename given");
 //        } else {
@@ -761,7 +761,7 @@ public class Worker extends Thread implements Closeable {
     /* Feature/About Commands */
     /* -------------------- */
 
-    private void handleSyst() {
+    private void command_SYST() {
         this.sendMessage(215, "COMP4621 FTP Server Homebrew");
     }
 
@@ -771,7 +771,7 @@ public class Worker extends Thread implements Closeable {
      * This is just a dummy message to satisfy clients, no real feature information
      * included.
      */
-    private void handleFeat() {
+    private void command_FEAT() {
         this.sendLineMessage(211, "Extensions supported:", "END"); // Dummy.
     }
 
