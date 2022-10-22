@@ -32,7 +32,7 @@ public class AthenaFtpServer implements AthenaServer {
         }
 
         try (ServerSocket welcomeListener = new ServerSocket(controlPort)) {
-            FastLogger.logStatic("Started http server on %d!", controlPort);
+            FastLogger.logStatic("Started ftp server on %d!", controlPort);
 
             while (true) {
                 try {
