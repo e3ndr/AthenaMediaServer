@@ -274,6 +274,51 @@ class FtpClient extends Thread implements Closeable {
 
     }
 
+    private void onAuthenticated() {
+        // example: format_mp4.quality_hd.videocodec_h264.audiocodec_aac
+        String[] parts = this.username.toLowerCase().split("\\.");
+
+        for (String part : parts) {
+            String[] splitPart = part.split("_", 2);
+            if (splitPart.length != 2) continue;
+
+            String key = splitPart[0];
+            String value = splitPart[1].toUpperCase();
+
+            switch (key) {
+                case "format": {
+                    this.containerFormat = ContainerFormat.valueOf(value);
+                    break;
+                }
+
+                case "quality": {
+                    this.videoQuality = VideoQuality.valueOf(value);
+                    break;
+                }
+
+                case "videocodec": {
+                    this.videoCodec = VideoCodec.valueOf(value);
+                    break;
+                }
+
+                case "audiocodec": {
+                    this.audioCodec = AudioCodec.valueOf(value);
+                    break;
+                }
+            }
+        }
+
+        this.sendMultilineMessage(
+            230,
+            "Welcome to Athena",
+            String.format(
+                "Chosen Parameters: format=%s, quality=%s, videoCodec=%s, audioCodec=%s",
+                this.containerFormat, this.videoQuality, this.videoCodec, this.audioCodec
+            ),
+            "User logged in successfully"
+        );
+    }
+
     /* -------------------- */
     /* Authentication Commands */
     /* -------------------- */
@@ -310,11 +355,8 @@ class FtpClient extends Thread implements Closeable {
         switch (this.loginState) {
             case ENTERED_USERNAME:
                 if (Athena.authenticate(password)) {
+                    this.onAuthenticated();
                     this.loginState = LoginState.LOGGED_IN;
-                    this.sendMultilineMessage(
-                        230,
-                        "Welcome to Athena", "User logged in successfully"
-                    );
                 } else {
                     this.sendMessage(530, "Not logged in");
                 }
