@@ -172,13 +172,12 @@ public class Athena {
         return true; // TODO
     }
 
-    public static List<String> listMedia() {
-        List<String> result = new LinkedList<>();
+    public static List<Media> listMedia() {
+        List<Media> result = new LinkedList<>();
 
         for (String mediaId : mediaDirectory.list()) {
             try {
-                Media media = getMedia(mediaId);
-                result.add(media.toString());
+                result.add(getMedia(mediaId));;
             } catch (IOException ignored) {}
         }
 

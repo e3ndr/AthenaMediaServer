@@ -7,9 +7,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
 import java.util.List;
 
 import xyz.e3ndr.athena.Athena;
+import xyz.e3ndr.athena.types.AudioCodec;
+import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.VideoCodec;
+import xyz.e3ndr.athena.types.VideoQuality;
+import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 /**
@@ -18,21 +24,25 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
  * @author Moritz Stueckler
  */
 class FtpClient extends Thread implements Closeable {
-    // Path information
-    private String currentDirectory = "/";
+
+    // quality information, parsed from username
+    private ContainerFormat containerFormat = ContainerFormat.MP4;
+    private VideoQuality videoQuality = VideoQuality.SOURCE;
+    private VideoCodec videoCodec = VideoCodec.H264;
+    private AudioCodec audioCodec = AudioCodec.SOURCE;
 
     // control connection
     private Socket controlSocket;
     private PrintWriter controlOutWriter;
     private BufferedReader controlIn;
 
-    // data Connection
+    // data connection
     private int dataPort;
     private ServerSocket dataSocket;
     private Socket dataConnection;
     private PrintWriter dataOutWriter;
 
-    // State
+    // state
     private TransferType transferMode = TransferType.ASCII;
     private LoginState loginState = LoginState.WAITING_FOR_USERNAME;
     private String username;
@@ -447,83 +457,6 @@ class FtpClient extends Thread implements Closeable {
     /* -------------------- */
 
     /**
-     * Handler for NLST (Named List) command. Lists the directory content in a short
-     * format (names only)
-     * 
-     * @param args The directory to be listed
-     */
-    private void command_NLST(String args) {
-        if (dataConnection == null || dataConnection.isClosed()) {
-            this.sendMessage(425, "No data connection was established");
-        } else {
-            List<String> files;
-
-            if (this.currentDirectory.equals("/")) {
-                files = Athena.listMedia();
-            } else {
-                this.sendMessage(550, "File does not exist.");
-                return;
-            }
-
-            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
-
-            for (String file : files) {
-                this.sendDataMsgToClient(file);
-            }
-
-            this.sendMessage(226, "Transfer complete.");
-            this.closeDataConnection();
-        }
-    }
-
-    /**
-     * Handler for LIST command. Lists the directory content in /bin/ls format.
-     * 
-     * @param args The directory to be listed
-     */
-    private void command_LIST(String args) {
-        // TODO
-        this.sendMessage(501, "Unknown command");
-    }
-
-    /**
-     * Handler for CWD (change working directory) command.
-     * 
-     * @param args New directory to be created
-     */
-    private void command_CWD(String args) {
-        // TODO
-        this.sendMessage(501, "Unknown command");
-    }
-
-    /**
-     * Handler for PWD (Print working directory) command. Returns the path of the
-     * current directory back to the client.
-     */
-    private void command_PWD() {
-        this.sendMessage(257, "\"%s\"", this.currentDirectory);
-    }
-
-    /**
-     * Handler for the MKD (make directory) command. Creates a new directory on the
-     * server.
-     * 
-     * @param args Directory name
-     */
-    private void command_MKD(String args) {
-        this.sendMessage(550, "Requested action not taken");
-    }
-
-    /**
-     * Handler for RMD (remove directory) command. Removes a directory.
-     * 
-     * @param dir directory to be deleted.
-     */
-    private void command_RMD(String dir) {
-        this.sendMessage(550, "Requested action not taken");
-    }
-
-    /**
      * Handler for the RETR (retrieve) command. Retrieve transfers a file from the
      * ftp server to the client.
      * 
@@ -622,6 +555,84 @@ class FtpClient extends Thread implements Closeable {
 //
 //        }
 //        closeDataConnection();
+    }
+
+    /**
+     * Handler for NLST (Named List) command. Lists the directory content in a short
+     * format (names only)
+     * 
+     * @param args The directory to be listed
+     */
+    private void command_NLST(String args) {
+        if (dataConnection == null || dataConnection.isClosed()) {
+            this.sendMessage(425, "No data connection was established");
+        } else {
+            List<String> files = new LinkedList<>();
+
+            for (Media media : Athena.listMedia()) {
+                files.add(
+                    String.format(
+                        "%s.%s",
+                        media.toString(), this.containerFormat.name().toLowerCase()
+                    )
+                );
+            }
+
+            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
+
+            for (String file : files) {
+                this.sendDataMsgToClient(file);
+            }
+
+            this.sendMessage(226, "Transfer complete.");
+            this.closeDataConnection();
+        }
+    }
+
+    /**
+     * Handler for LIST command. Lists the directory content in /bin/ls format.
+     * 
+     * @param args The directory to be listed
+     */
+    private void command_LIST(String args) {
+        // TODO
+        this.sendMessage(501, "Unknown command");
+    }
+
+    /**
+     * Handler for CWD (change working directory) command.
+     * 
+     * @param args New directory to be created
+     */
+    private void command_CWD(String args) {
+        this.sendMessage(550, "Requested action not taken");
+    }
+
+    /**
+     * Handler for PWD (Print working directory) command. Returns the path of the
+     * current directory back to the client.
+     */
+    private void command_PWD() {
+        this.sendMessage(257, "\"/\"");
+    }
+
+    /**
+     * Handler for the MKD (make directory) command. Creates a new directory on the
+     * server.
+     * 
+     * @param args Directory name
+     */
+    private void command_MKD(String args) {
+        this.sendMessage(550, "Requested action not taken");
+    }
+
+    /**
+     * Handler for RMD (remove directory) command. Removes a directory.
+     * 
+     * @param dir directory to be deleted.
+     */
+    private void command_RMD(String dir) {
+        this.sendMessage(550, "Requested action not taken");
     }
 
     /**
