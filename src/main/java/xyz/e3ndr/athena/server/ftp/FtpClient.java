@@ -247,12 +247,7 @@ class FtpClient extends Thread implements Closeable {
     }
 
     private void sendDataMsgToClient(String msg) {
-        if (this.dataConnection == null || this.dataConnection.isClosed()) {
-            this.sendMessage(425, "No data connection was established");
-            this.logger.warn("Cannot send message because there is no data connection active.");
-        } else {
-            this.dataOutWriter.print(msg + '\r' + '\n');
-        }
+        this.dataOutWriter.print(msg + '\r' + '\n');
     }
 
     private void openDataConnectionPassive(int port) {
@@ -322,6 +317,10 @@ class FtpClient extends Thread implements Closeable {
             ),
             "User logged in successfully"
         );
+    }
+
+    private boolean hasDataConnection() {
+        return (this.dataConnection != null) && !this.dataConnection.isClosed();
     }
 
     /* -------------------- */
@@ -602,6 +601,12 @@ class FtpClient extends Thread implements Closeable {
 //
 //        }
 //        closeDataConnection();
+        try (OutputStream target = this.dataConnection.getOutputStream()) {
+            this.sendMessage(150, "Opening binary mode data connection for requested file " + file);
+            this.sendMessage(226, "File transfer successful, closing data connection");
+        } finally {
+            closeDataConnection();
+        }
     }
 
     /**
@@ -611,29 +616,28 @@ class FtpClient extends Thread implements Closeable {
      * @param args The directory to be listed
      */
     private void command_NLST(String args) {
-        if (dataConnection == null || dataConnection.isClosed()) {
+        if (!this.hasDataConnection()) {
             this.sendMessage(425, "No data connection was established");
-        } else {
-            List<String> files = new LinkedList<>();
 
-            for (Media media : Athena.listMedia()) {
-                files.add(
-                    String.format(
-                        "%s.%s",
-                        media.toString(), this.containerFormat.name().toLowerCase()
-                    )
-                );
-            }
+            return;
+        }
 
             this.sendMessage(125, "Opening ASCII mode data connection for file list.");
+        List<String> files = new LinkedList<>();
 
-            for (String file : files) {
-                this.sendDataMsgToClient(file);
-            }
+        for (Media media : Athena.listMedia()) {
+                String.format(
+                    "%s.%s",
+                    media.toString(), this.containerFormat.name().toLowerCase()
 
             this.sendMessage(226, "Transfer complete.");
             this.closeDataConnection();
+
+        for (String file : files) {
         }
+
+        this.sendMessage(226, "Transfer complete.");
+        this.closeDataConnection();
     }
 
     /**
@@ -642,33 +646,32 @@ class FtpClient extends Thread implements Closeable {
      * @param args The directory to be listed
      */
     private void command_LIST(String args) {
-        if (dataConnection == null || dataConnection.isClosed()) {
+        if (!this.hasDataConnection()) {
             this.sendMessage(425, "No data connection was established");
-        } else {
-            List<String> files = new LinkedList<>();
+        }
 
-            for (Media media : Athena.listMedia()) {
-                int day = media.getInfo().getDay();
-                if (day <= 0) day = 1;
 
-                int month = media.getInfo().getMonth();
-                String monthStr = monthToString(month);
-                if (monthStr == null) monthStr = "Jan";
+        for (Media media : Athena.listMedia()) {
+            int day = media.getInfo().getDay();
+            if (day <= 0) day = 1;
 
-                int year = media.getInfo().getYear();
-                if (year <= 0) year = 0;
+            int month = media.getInfo().getMonth();
+            String monthStr = monthToString(month);
+            if (monthStr == null) monthStr = "Jan";
 
-                String ls = String.format(
-                    "-rw-r--r-- 1 Athena Media          1337 %s %02d %04d %s [%s].%s",
                     monthStr, day, year,
-                    media.getInfo().getTitle(), media.getId(), this.containerFormat.name().toLowerCase()
-                );
+            int year = media.getInfo().getYear();
+            if (year <= 0) year = 0;
 
-                files.add(ls);
-                this.logger.trace("LIST Entry: %s", ls);
-            }
+            String ls = String.format(
+                monthStr, day, year,
+                media.getInfo().getTitle(), media.getId(), this.containerFormat.name().toLowerCase()
+            );
 
             this.sendMessage(125, "Opening ASCII mode data connection for file list.");
+            files.add(ls);
+            this.logger.trace("LIST Entry: %s", ls);
+        }
 
             for (String file : files) {
                 this.sendDataMsgToClient(file);
