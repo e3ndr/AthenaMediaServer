@@ -58,9 +58,8 @@ public class Launcher {
         Files.writeString(configFile.toPath(), Rson.DEFAULT.toJson(config).toString(true));
 
         Config _pointer = config;
-        AsyncTask.create(() -> new AthenaHttpServer().start(_pointer));
-        AsyncTask.create(() -> new AthenaFtpServer().start(_pointer));
-
+        AsyncTask.createNonDaemon(() -> new AthenaHttpServer().start(_pointer));
+        AsyncTask.createNonDaemon(() -> new AthenaFtpServer().start(_pointer));
     }
 
 }
