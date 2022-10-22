@@ -643,13 +643,24 @@ class FtpClient extends Thread implements Closeable {
             List<String> files = new LinkedList<>();
 
             for (Media media : Athena.listMedia()) {
-                files.add(
-                    String.format(
-                        "-rw-r--r-- 1 Athena watch          1337 Jul 1  %s %s.%s",
-                        media.getInfo().getYear(),
-                        media.toString(), this.containerFormat.name().toLowerCase()
-                    )
+                int day = media.getInfo().getDay();
+                if (day <= 0) day = 1;
+
+                int month = media.getInfo().getMonth();
+                String monthStr = monthToString(month);
+                if (monthStr == null) monthStr = "Jan";
+
+                int year = media.getInfo().getYear();
+                if (year <= 0) year = 0;
+
+                String ls = String.format(
+                    "-rw-r--r-- 1 Athena Media          1337 %s %02d %04d %s [%s].%s",
+                    monthStr, day, year,
+                    media.getInfo().getTitle(), media.getId(), this.containerFormat.name().toLowerCase()
                 );
+
+                files.add(ls);
+                this.logger.trace("LIST Entry: %s", ls);
             }
 
             this.sendMessage(125, "Opening ASCII mode data connection for file list.");
@@ -725,6 +736,41 @@ class FtpClient extends Thread implements Closeable {
      */
     private void command_FEAT() {
         this.sendMultilineMessage(211, "Extensions supported:", "END"); // Dummy.
+    }
+
+    /* -------------------- */
+    /* Helpers              */
+    /* -------------------- */
+
+    private String monthToString(int month) {
+        switch (month) {
+            case 1:
+                return "Jan";
+            case 2:
+                return "Feb";
+            case 3:
+                return "Mar";
+            case 4:
+                return "Apr";
+            case 5:
+                return "May";
+            case 6:
+                return "Jun";
+            case 7:
+                return "Jul";
+            case 8:
+                return "Aug";
+            case 9:
+                return "Sep";
+            case 10:
+                return "Oct";
+            case 11:
+                return "Nov";
+            case 12:
+                return "Dec";
+            default:
+                return null;
+        }
     }
 
 }
