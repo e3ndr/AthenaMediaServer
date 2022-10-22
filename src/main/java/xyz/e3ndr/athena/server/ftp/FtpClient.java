@@ -89,13 +89,13 @@ class FtpClient extends Thread implements Closeable {
                 this.onCommand(line);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            this.logger.fatal("Uncaught exception:\n%s", e);
         } finally {
             this.close();
         }
     }
 
-    private void onCommand(String line) {
+    private void onCommand(String line) throws Exception {
         this.logger.debug("\u2193 %s", line);
 
         // split command and arguments
