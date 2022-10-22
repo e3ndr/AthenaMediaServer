@@ -637,8 +637,30 @@ class FtpClient extends Thread implements Closeable {
      * @param args The directory to be listed
      */
     private void command_LIST(String args) {
-        // TODO
-        this.sendMessage(501, "Unknown command");
+        if (dataConnection == null || dataConnection.isClosed()) {
+            this.sendMessage(425, "No data connection was established");
+        } else {
+            List<String> files = new LinkedList<>();
+
+            for (Media media : Athena.listMedia()) {
+                files.add(
+                    String.format(
+                        "-rw-r--r-- 1 Athena watch          1337 Jul 1  %s %s.%s",
+                        media.getInfo().getYear(),
+                        media.toString(), this.containerFormat.name().toLowerCase()
+                    )
+                );
+            }
+
+            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
+
+            for (String file : files) {
+                this.sendDataMsgToClient(file);
+            }
+
+            this.sendMessage(226, "Transfer complete.");
+            this.closeDataConnection();
+        }
     }
 
     /**
