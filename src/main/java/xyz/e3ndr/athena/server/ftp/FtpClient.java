@@ -685,7 +685,7 @@ class FtpClient extends Thread implements Closeable {
      * @param args New directory to be created
      */
     private void command_CWD(String args) {
-        this.sendMessage(550, "Requested action not taken");
+        this.sendMessage(250, "The current directory has been changed to /");
     }
 
     /**
