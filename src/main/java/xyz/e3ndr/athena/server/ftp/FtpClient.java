@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -18,7 +19,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
  */
 class FtpClient extends Thread implements Closeable {
     // Path information
-    private String currDirectory;
+    private String currentDirectory = "/";
 
     // control connection
     private Socket controlSocket;
@@ -102,7 +103,7 @@ class FtpClient extends Thread implements Closeable {
                 break;
 
             case "LIST":
-                command_NLST(args);
+                command_LIST(args);
                 break;
 
             case "NLST":
@@ -403,7 +404,7 @@ class FtpClient extends Thread implements Closeable {
         String ipVersion = splitArgs[1];
         String ipAddress = splitArgs[2];
 
-        if (!IPV4.equals(ipVersion) || !IPV6.equals(ipVersion)) {
+        if (!IPV4.equals(ipVersion) && !IPV6.equals(ipVersion)) {
             throw new IllegalArgumentException("Unsupported IP version");
         }
 
@@ -452,26 +453,37 @@ class FtpClient extends Thread implements Closeable {
      * @param args The directory to be listed
      */
     private void command_NLST(String args) {
-//        if (dataConnection == null || dataConnection.isClosed()) {
-//            sendMessage("425 No data connection was established");
-//        } else {
-//
-//            String[] dirContent = nlstHelper(args);
-//
-//            if (dirContent == null) {
-//                sendMessage("550 File does not exist.");
-//            } else {
-//                sendMessage("125 Opening ASCII mode data connection for file list.");
-//
-//                for (int i = 0; i < dirContent.length; i++) {
-//                    sendDataMsgToClient(dirContent[i]);
-//                }
-//
-//                sendMessage("226 Transfer complete.");
-//                closeDataConnection();
-//
-//            }
-//        }
+        if (dataConnection == null || dataConnection.isClosed()) {
+            this.sendMessage(425, "No data connection was established");
+        } else {
+            List<String> files;
+
+            if (this.currentDirectory.equals("/")) {
+                files = Athena.listMedia();
+            } else {
+                this.sendMessage(550, "File does not exist.");
+                return;
+            }
+
+            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
+
+            for (String file : files) {
+                this.sendDataMsgToClient(file);
+            }
+
+            this.sendMessage(226, "Transfer complete.");
+            this.closeDataConnection();
+        }
+    }
+
+    /**
+     * Handler for LIST command. Lists the directory content in /bin/ls format.
+     * 
+     * @param args The directory to be listed
+     */
+    private void command_LIST(String args) {
+        // TODO
+        this.sendMessage(501, "Unknown command");
     }
 
     /**
@@ -480,30 +492,8 @@ class FtpClient extends Thread implements Closeable {
      * @param args New directory to be created
      */
     private void command_CWD(String args) {
-//        String filename = currDirectory;
-//
-//        // go one level up (cd ..)
-//        if (args.equals("..")) {
-//            int ind = filename.lastIndexOf(fileSeparator);
-//            if (ind > 0) {
-//                filename = filename.substring(0, ind);
-//            }
-//        }
-//
-//        // if argument is anything else (cd . does nothing)
-//        else if ((args != null) && (!args.equals("."))) {
-//            filename = filename + fileSeparator + args;
-//        }
-//
-//        // check if file exists, is directory and is not above root directory
-//        File f = new File(filename);
-//
-//        if (f.exists() && f.isDirectory() && (filename.length() >= root.length())) {
-//            currDirectory = filename;
-//            sendMessage("250 The current directory has been changed to " + currDirectory);
-//        } else {
-//            sendMessage("550 Requested action not taken. File unavailable.");
-//        }
+        // TODO
+        this.sendMessage(501, "Unknown command");
     }
 
     /**
@@ -511,7 +501,7 @@ class FtpClient extends Thread implements Closeable {
      * current directory back to the client.
      */
     private void command_PWD() {
-//        this.sendMessage("257 \"" + currDirectory + "\"");
+        this.sendMessage(257, "\"%s\"", this.currentDirectory);
     }
 
     /**
@@ -521,19 +511,7 @@ class FtpClient extends Thread implements Closeable {
      * @param args Directory name
      */
     private void command_MKD(String args) {
-//        // Allow only alphanumeric characters
-//        if (args != null && args.matches("^[a-zA-Z0-9]+$")) {
-//            File dir = new File(currDirectory + fileSeparator + args);
-//
-//            if (!dir.mkdir()) {
-//                sendMessage("550 Failed to create new directory");
-//                debugOutput("Failed to create new directory");
-//            } else {
-//                sendMessage("250 Directory successfully created");
-//            }
-//        } else {
-//            sendMessage("550 Invalid name");
-//        }
+        this.sendMessage(550, "Requested action not taken");
     }
 
     /**
@@ -542,25 +520,7 @@ class FtpClient extends Thread implements Closeable {
      * @param dir directory to be deleted.
      */
     private void command_RMD(String dir) {
-//        String filename = currDirectory;
-//
-//        // only alphanumeric folder names are allowed
-//        if (dir != null && dir.matches("^[a-zA-Z0-9]+$")) {
-//            filename = filename + fileSeparator + dir;
-//
-//            // check if file exists, is directory
-//            File d = new File(filename);
-//
-//            if (d.exists() && d.isDirectory()) {
-//                d.delete();
-//
-//                sendMessage("250 Directory was successfully removed");
-//            } else {
-//                sendMessage("550 Requested action not taken. File unavailable.");
-//            }
-//        } else {
-//            sendMessage("550 Invalid file name.");
-//        }
+        this.sendMessage(550, "Requested action not taken");
     }
 
     /**
@@ -570,6 +530,8 @@ class FtpClient extends Thread implements Closeable {
      * @param file The file to transfer to the user
      */
     private void command_RETR(String file) {
+        // TODO
+        this.sendMessage(501, "Unknown command");
 //        File f = new File(currDirectory + fileSeparator + file);
 //
 //        if (!f.exists()) {
@@ -669,100 +631,7 @@ class FtpClient extends Thread implements Closeable {
      * @param file The file that the user wants to store on the server
      */
     private void command_STOR(String file) {
-//        if (file == null) {
-//            sendMessage("501 No filename given");
-//        } else {
-//            File f = new File(currDirectory + fileSeparator + file);
-//
-//            if (f.exists()) {
-//                sendMessage("550 File already exists");
-//            }
-//
-//            else {
-//
-//                // Binary mode
-//                if (transferMode == TransferType.BINARY) {
-//                    BufferedOutputStream fout = null;
-//                    BufferedInputStream fin = null;
-//
-//                    sendMessage("150 Opening binary mode data connection for requested file " + f.getName());
-//
-//                    try {
-//                        // create streams
-//                        fout = new BufferedOutputStream(new FileOutputStream(f));
-//                        fin = new BufferedInputStream(dataConnection.getInputStream());
-//                    } catch (Exception e) {
-//                        debugOutput("Could not create file streams");
-//                    }
-//
-//                    debugOutput("Start receiving file " + f.getName());
-//
-//                    // write file with buffer
-//                    byte[] buf = new byte[1024];
-//                    int l = 0;
-//                    try {
-//                        while ((l = fin.read(buf, 0, 1024)) != -1) {
-//                            fout.write(buf, 0, l);
-//                        }
-//                    } catch (IOException e) {
-//                        debugOutput("Could not read from or write to file streams");
-//                        e.printStackTrace();
-//                    }
-//
-//                    // close streams
-//                    try {
-//                        fin.close();
-//                        fout.close();
-//                    } catch (IOException e) {
-//                        debugOutput("Could not close file streams");
-//                        e.printStackTrace();
-//                    }
-//
-//                    debugOutput("Completed receiving file " + f.getName());
-//
-//                    sendMessage("226 File transfer successful. Closing data connection.");
-//
-//                }
-//
-//                // ASCII mode
-//                else {
-//                    sendMessage("150 Opening ASCII mode data connection for requested file " + f.getName());
-//
-//                    BufferedReader rin = null;
-//                    PrintWriter rout = null;
-//
-//                    try {
-//                        rin = new BufferedReader(new InputStreamReader(dataConnection.getInputStream()));
-//                        rout = new PrintWriter(new FileOutputStream(f), true);
-//
-//                    } catch (IOException e) {
-//                        debugOutput("Could not create file streams");
-//                    }
-//
-//                    String s;
-//
-//                    try {
-//                        while ((s = rin.readLine()) != null) {
-//                            rout.println(s);
-//                        }
-//                    } catch (IOException e) {
-//                        debugOutput("Could not read from or write to file streams");
-//                        e.printStackTrace();
-//                    }
-//
-//                    try {
-//                        rout.close();
-//                        rin.close();
-//                    } catch (IOException e) {
-//                        debugOutput("Could not close file streams");
-//                        e.printStackTrace();
-//                    }
-//                    sendMessage("226 File transfer successful. Closing data connection.");
-//                }
-//
-//            }
-//            closeDataConnection();
-//        }
+        this.sendMessage(552, "Exceeded storage allocation");
     }
 
     /* -------------------- */
