@@ -209,7 +209,7 @@ class FtpClient extends Thread implements Closeable {
         controlOutWriter.printf("%d %s", statusCode, message);
     }
 
-    private void sendLineMessage(int statusCode, String... messages) {
+    private void sendMultilineMessage(int statusCode, String... messages) {
         for (int idx = 0; idx < messages.length; idx++) {
             String message = messages[idx];
             boolean isLast = idx == messages.length - 1;
@@ -225,7 +225,7 @@ class FtpClient extends Thread implements Closeable {
     private void sendDataMsgToClient(String msg) {
         if (this.dataConnection == null || this.dataConnection.isClosed()) {
             this.sendMessage(425, "No data connection was established");
-            this.logger.warn("Cannot send message, because no data connection is established");
+            this.logger.warn("Cannot send message because there is no data connection active.");
         } else {
             this.dataOutWriter.print(msg + '\r' + '\n');
         }
@@ -236,7 +236,7 @@ class FtpClient extends Thread implements Closeable {
             this.dataSocket = new ServerSocket(port);
             this.dataConnection = this.dataSocket.accept();
             this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
-            this.logger.debug("Established Passive mode connection!");
+            this.logger.debug("Established Passive Mode connection!");
         } catch (IOException e) {
             e.printStackTrace();
             this.logger.severe("Unable to establish Passive Mode connection:\n%s", e);
@@ -248,7 +248,7 @@ class FtpClient extends Thread implements Closeable {
         try {
             dataConnection = new Socket(ipAddress, port);
             dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
-            this.logger.debug("Established Active mode connection!");
+            this.logger.debug("Established Active Mode connection!");
         } catch (IOException e) {
             this.logger.severe("Unable to establish Active Mode connection:\n%s", e);
         }
@@ -292,7 +292,7 @@ class FtpClient extends Thread implements Closeable {
             case ENTERED_USERNAME:
                 if (Athena.authenticate(password)) {
                     this.loginState = LoginState.LOGGED_IN;
-                    this.sendLineMessage(
+                    this.sendMultilineMessage(
                         230,
                         "Welcome to Athena", "User logged in successfully"
                     );
@@ -762,7 +762,7 @@ class FtpClient extends Thread implements Closeable {
     /* -------------------- */
 
     private void command_SYST() {
-        this.sendMessage(215, "COMP4621 FTP Server Homebrew");
+        this.sendMessage(215, "AthenaMediaServer FTP Server Homebrew");
     }
 
     /**
@@ -772,7 +772,7 @@ class FtpClient extends Thread implements Closeable {
      * included.
      */
     private void command_FEAT() {
-        this.sendLineMessage(211, "Extensions supported:", "END"); // Dummy.
+        this.sendMultilineMessage(211, "Extensions supported:", "END"); // Dummy.
     }
 
 }
