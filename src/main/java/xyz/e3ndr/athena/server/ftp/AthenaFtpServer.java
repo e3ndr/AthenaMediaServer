@@ -27,7 +27,7 @@ public class AthenaFtpServer implements AthenaServer {
         if (controlPort == -1) return;
 
         // Generate a list of ports.
-        for (int port = controlPort; port < controlPort + MAX_CLIENTS; port++) {
+        for (int port = controlPort + 1; port < controlPort + MAX_CLIENTS; port++) {
             openPorts.add(port);
         }
 
