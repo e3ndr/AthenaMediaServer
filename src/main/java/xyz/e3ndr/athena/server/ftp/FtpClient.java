@@ -221,11 +221,14 @@ class FtpClient extends Thread implements Closeable {
     }
 
     private void closeDataConnection() {
-        if (this.dataSocket != null) {
+        if (this.dataConnectionPromise != null) {
             try {
-                this.dataSocket.close();
+                if (this.dataSocket != null) {
+                    this.dataSocket.close();
+                }
 
                 if (this.dataConnection != null) {
+                    this.dataOutWriter.flush();
                     this.dataConnection.close();
                     this.dataOutWriter.close();
                 }
@@ -264,27 +267,27 @@ class FtpClient extends Thread implements Closeable {
             this.dataSocket.close();
         }
 
-        this.dataSocket = new ServerSocket(port);
         this.dataConnectionPromise = new PromiseWithHandles<>();
+        this.dataSocket = new ServerSocket(port);
 
         AsyncTask.create(() -> {
             try {
                 this.dataConnection = this.dataSocket.accept();
                 this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
+                this.dataConnectionPromise.resolve(null);
                 this.logger.debug("Established Passive Mode connection!");
             } catch (IOException e) {
                 this.logger.severe("Unable to establish Passive Mode connection:\n%s", e);
-                this.close();
             }
-
-            this.dataConnectionPromise.resolve(null);
         });
     }
 
     private void openDataConnectionActive(String ipAddress, int port) {
         try {
-            dataConnection = new Socket(ipAddress, port);
-            dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
+            this.dataConnection = new Socket(ipAddress, port);
+            this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
+            this.dataConnectionPromise = new PromiseWithHandles<>();
+            this.dataConnectionPromise.resolve(null);
             this.logger.debug("Established Active Mode connection!");
         } catch (IOException e) {
             this.logger.severe("Unable to establish Active Mode connection:\n%s", e);
@@ -332,13 +335,18 @@ class FtpClient extends Thread implements Closeable {
     }
 
     private boolean hasDataConnection() {
+        if (this.dataConnectionPromise == null) {
+            return false;
+        }
+
+        // Wait for the connection to complete.
         if (!this.dataConnectionPromise.hasCompleted()) {
             try {
                 this.dataConnectionPromise.await();
             } catch (Throwable e) {}
         }
 
-        return (this.dataConnection != null) && !this.dataConnection.isClosed();
+        return true;
     }
 
     /* -------------------- */
