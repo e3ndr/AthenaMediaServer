@@ -3,13 +3,17 @@ package xyz.e3ndr.athena.server.ftp;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
+import co.casterlabs.commons.async.AsyncTask;
+import co.casterlabs.commons.async.PromiseWithHandles;
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
@@ -26,7 +30,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 class FtpClient extends Thread implements Closeable {
 
     // quality information, parsed from username
-    private ContainerFormat containerFormat = ContainerFormat.MP4;
+    private ContainerFormat containerFormat = ContainerFormat.MKV;
     private VideoQuality videoQuality = VideoQuality.SOURCE;
     private VideoCodec videoCodec = VideoCodec.H264;
     private AudioCodec audioCodec = AudioCodec.SOURCE;
@@ -41,6 +45,7 @@ class FtpClient extends Thread implements Closeable {
     private ServerSocket dataSocket;
     private Socket dataConnection;
     private PrintWriter dataOutWriter;
+    private PromiseWithHandles<Void> dataConnectionPromise;
 
     // state
     private TransferType transferMode = TransferType.ASCII;
@@ -50,6 +55,8 @@ class FtpClient extends Thread implements Closeable {
     private boolean doControlLoop = true;
 
     private FastLogger logger;
+
+    private Thread activeSendThread;
 
     public FtpClient(Socket client, int dataPort) throws IOException {
         this.dataPort = dataPort;
@@ -139,7 +146,7 @@ class FtpClient extends Thread implements Closeable {
                 break;
 
             case "EPSV":
-                command_EPSV();
+                command_EPSV(args);
                 break;
 
             case "SYST":
@@ -180,6 +187,14 @@ class FtpClient extends Thread implements Closeable {
                 command_STOR(args);
                 break;
 
+            case "SIZE":
+                command_SIZE(args);
+                break;
+
+            case "ABOR":
+                command_ABOR();
+                break;
+
             default:
                 this.sendMessage(501, "Unknown command");
                 break;
@@ -206,17 +221,19 @@ class FtpClient extends Thread implements Closeable {
     }
 
     private void closeDataConnection() {
-        if (this.dataConnection != null) {
+        if (this.dataSocket != null) {
             try {
-                this.dataOutWriter.close();
-                this.dataConnection.close();
-                if (this.dataSocket != null) {
-                    this.dataSocket.close();
+                this.dataSocket.close();
+
+                if (this.dataConnection != null) {
+                    this.dataConnection.close();
+                    this.dataOutWriter.close();
                 }
 
                 this.logger.debug("Closed Data Connection.");
             } catch (IOException ignored) {}
 
+            this.dataConnectionPromise = null;
             this.dataOutWriter = null;
             this.dataConnection = null;
             this.dataSocket = null;
@@ -228,39 +245,40 @@ class FtpClient extends Thread implements Closeable {
         this.logger.debug("\u2191 %s", line);
     }
 
+    private void sendMark(int statusCode, String format, Object... args) {
+        String message = String.format(format, args);
+        this.writeControl(String.format("%d-%s", statusCode, message));
+    }
+
     private void sendMessage(int statusCode, String format, Object... args) {
         String message = String.format(format, args);
         this.writeControl(String.format("%d %s", statusCode, message));
-    }
-
-    private void sendMultilineMessage(int statusCode, String... messages) {
-        for (int idx = 0; idx < messages.length; idx++) {
-            String message = messages[idx];
-            boolean isLast = idx == messages.length - 1;
-
-            if (isLast) {
-                this.writeControl(String.format("%d %s", statusCode, message));
-            } else {
-                this.writeControl(String.format("%d-%s", statusCode, message));
-            }
-        }
     }
 
     private void sendDataMsgToClient(String msg) {
         this.dataOutWriter.print(msg + '\r' + '\n');
     }
 
-    private void openDataConnectionPassive(int port) {
-        try {
-            this.dataSocket = new ServerSocket(port);
-            this.dataConnection = this.dataSocket.accept();
-            this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
-            this.logger.debug("Established Passive Mode connection!");
-        } catch (IOException e) {
-            e.printStackTrace();
-            this.logger.severe("Unable to establish Passive Mode connection:\n%s", e);
-            this.close();
+    private void openDataConnectionPassive(int port) throws IOException {
+        if (this.dataSocket != null) {
+            this.dataSocket.close();
         }
+
+        this.dataSocket = new ServerSocket(port);
+        this.dataConnectionPromise = new PromiseWithHandles<>();
+
+        AsyncTask.create(() -> {
+            try {
+                this.dataConnection = this.dataSocket.accept();
+                this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
+                this.logger.debug("Established Passive Mode connection!");
+            } catch (IOException e) {
+                this.logger.severe("Unable to establish Passive Mode connection:\n%s", e);
+                this.close();
+            }
+
+            this.dataConnectionPromise.resolve(null);
+        });
     }
 
     private void openDataConnectionActive(String ipAddress, int port) {
@@ -308,18 +326,18 @@ class FtpClient extends Thread implements Closeable {
             }
         }
 
-        this.sendMultilineMessage(
-            230,
-            "Welcome to Athena",
-            String.format(
-                "Chosen Parameters: format=%s, quality=%s, videoCodec=%s, audioCodec=%s",
-                this.containerFormat, this.videoQuality, this.videoCodec, this.audioCodec
-            ),
-            "User logged in successfully"
-        );
+        this.sendMark(230, "Welcome to Athena");
+        this.sendMark(230, "Chosen Parameters: format=%s, quality=%s, videoCodec=%s, audioCodec=%s", this.containerFormat, this.videoQuality, this.videoCodec, this.audioCodec);
+        this.sendMessage(230, "User logged in successfully");
     }
 
     private boolean hasDataConnection() {
+        if (!this.dataConnectionPromise.hasCompleted()) {
+            try {
+                this.dataConnectionPromise.await();
+            } catch (Throwable e) {}
+        }
+
         return (this.dataConnection != null) && !this.dataConnection.isClosed();
     }
 
@@ -383,8 +401,10 @@ class FtpClient extends Thread implements Closeable {
      * Handler for PASV command which initiates the passive mode. In passive mode
      * the client initiates the data connection to the server. In active mode the
      * server initiates the data connection to the client.
+     * 
+     * @throws IOException
      */
-    private void command_PASV() {
+    private void command_PASV() throws IOException {
         // Using fixed IP for connections on the same machine
         // For usage on separate hosts, we'd need to get the local IP address from
         // somewhere
@@ -408,10 +428,17 @@ class FtpClient extends Thread implements Closeable {
      * Handler for EPSV command which initiates extended passive mode. Similar to
      * PASV but for newer clients (IPv6 support is possible but not implemented
      * here).
+     * 
+     * @throws IOException
      */
-    private void command_EPSV() {
+    private void command_EPSV(String args) throws IOException {
+//        if ("ALL".equalsIgnoreCase(args)) {
+//            this.sendMessage(229, "OK");
+//            return;
+//        }
+
         this.sendMessage(229, "Entering Extended Passive Mode (|||%s|)", this.dataPort);
-        openDataConnectionPassive(this.dataPort);
+        this.openDataConnectionPassive(this.dataPort);
     }
 
     /**
@@ -503,110 +530,88 @@ class FtpClient extends Thread implements Closeable {
     /* -------------------- */
 
     /**
+     * Handler for SIZE command. We're going to give a bogus reply.
+     * 
+     * @param file The file that the user wants to store on the server
+     */
+    private void command_SIZE(String file) {
+        this.sendMessage(213, String.valueOf(133700000));
+    }
+
+    /**
+     * Handler for ABOR (Abort) command, which cancels the current transfer.
+     * 
+     */
+    private void command_ABOR() {
+        if (this.activeSendThread != null && this.activeSendThread.isAlive()) {
+            this.activeSendThread.interrupt();
+        }
+        this.sendMessage(216, "Aborted file transfer");
+    }
+
+    /**
      * Handler for the RETR (retrieve) command. Retrieve transfers a file from the
      * ftp server to the client.
      * 
-     * @param file The file to transfer to the user
+     * @param  file        The file to transfer to the user
+     * 
+     * @throws IOException
      */
     private void command_RETR(String file) {
-        // TODO
-        this.sendMessage(501, "Unknown command");
-//        File f = new File(currDirectory + fileSeparator + file);
-//
-//        if (!f.exists()) {
-//            sendMessage("550 File does not exist");
-//        }
-//
-//        else {
-//
-//            // Binary mode
-//            if (transferMode == TransferType.BINARY) {
-//                BufferedOutputStream fout = null;
-//                BufferedInputStream fin = null;
-//
-//                sendMessage("150 Opening binary mode data connection for requested file " + f.getName());
-//
-//                try {
-//                    // create streams
-//                    fout = new BufferedOutputStream(dataConnection.getOutputStream());
-//                    fin = new BufferedInputStream(new FileInputStream(f));
-//                } catch (Exception e) {
-//                    debugOutput("Could not create file streams");
-//                }
-//
-//                debugOutput("Starting file transmission of " + f.getName());
-//
-//                // write file with buffer
-//                byte[] buf = new byte[1024];
-//                int l = 0;
-//                try {
-//                    while ((l = fin.read(buf, 0, 1024)) != -1) {
-//                        fout.write(buf, 0, l);
-//                    }
-//                } catch (IOException e) {
-//                    debugOutput("Could not read from or write to file streams");
-//                    e.printStackTrace();
-//                }
-//
-//                // close streams
-//                try {
-//                    fin.close();
-//                    fout.close();
-//                } catch (IOException e) {
-//                    debugOutput("Could not close file streams");
-//                    e.printStackTrace();
-//                }
-//
-//                debugOutput("Completed file transmission of " + f.getName());
-//
-//                sendMessage("226 File transfer successful. Closing data connection.");
-//
-//            }
-//
-//            // ASCII mode
-//            else {
-//                sendMessage("150 Opening ASCII mode data connection for requested file " + f.getName());
-//
-//                BufferedReader rin = null;
-//                PrintWriter rout = null;
-//
-//                try {
-//                    rin = new BufferedReader(new FileReader(f));
-//                    rout = new PrintWriter(dataConnection.getOutputStream(), true);
-//
-//                } catch (IOException e) {
-//                    debugOutput("Could not create file streams");
-//                }
-//
-//                String s;
-//
-//                try {
-//                    while ((s = rin.readLine()) != null) {
-//                        rout.println(s);
-//                    }
-//                } catch (IOException e) {
-//                    debugOutput("Could not read from or write to file streams");
-//                    e.printStackTrace();
-//                }
-//
-//                try {
-//                    rout.close();
-//                    rin.close();
-//                } catch (IOException e) {
-//                    debugOutput("Could not close file streams");
-//                    e.printStackTrace();
-//                }
-//                sendMessage("226 File transfer successful. Closing data connection.");
-//            }
-//
-//        }
-//        closeDataConnection();
-        try (OutputStream target = this.dataConnection.getOutputStream()) {
-            this.sendMessage(150, "Opening binary mode data connection for requested file " + file);
-            this.sendMessage(226, "File transfer successful, closing data connection");
-        } finally {
-            closeDataConnection();
+        if (!this.hasDataConnection()) {
+            this.sendMessage(425, "No data connection was established");
+            return;
         }
+
+        if (this.transferMode != TransferType.BINARY) {
+            this.sendMessage(550, "Unable to stream file in ASCII mode, switch to Binary to get a real response");
+            this.closeDataConnection();
+            return;
+        }
+
+        if (this.activeSendThread != null && this.activeSendThread.isAlive()) {
+            try {
+                this.activeSendThread.join();
+            } catch (InterruptedException ignore) {}
+        }
+
+        this.sendMessage(150, "Opening binary mode data connection for requested file %s", file);
+
+        AsyncTask.create(() -> {
+            this.activeSendThread = Thread.currentThread();
+
+            try (OutputStream target = this.dataConnection.getOutputStream()) {
+                String mediaId = file                     // The Breakfast Club [IMDB_tt0088847].mp4
+                    .substring(file.lastIndexOf('[') + 1) // IMDB_tt0088847].mp4
+                    .split("]\\.")[0];                    // IMDB_tt0088847
+
+                Media media = Athena.getMedia(mediaId);
+                int[] streamIds = media.getFiles().getStreams().getDefaultStreams();
+
+                // Video
+                try (InputStream videoInputStream = Athena.startStream(
+                    media,
+                    0,
+                    this.videoQuality, this.videoCodec, this.audioCodec, this.containerFormat,
+                    streamIds
+                )) {
+                    // Stream it!
+                    byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
+                    int read = 0;
+
+                    while ((read = videoInputStream.read(buffer)) != -1) {
+                        target.write(buffer, 0, read);
+                        target.flush();
+                    }
+
+                    this.sendMessage(226, "File transfer successful, closing data connection");
+                }
+            } catch (IOException e) {
+                this.logger.exception(e);
+            } finally {
+                this.closeDataConnection();
+            }
+        });
     }
 
     /**
@@ -618,22 +623,24 @@ class FtpClient extends Thread implements Closeable {
     private void command_NLST(String args) {
         if (!this.hasDataConnection()) {
             this.sendMessage(425, "No data connection was established");
-
             return;
         }
 
-            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
         List<String> files = new LinkedList<>();
 
         for (Media media : Athena.listMedia()) {
+            files.add(
                 String.format(
                     "%s.%s",
                     media.toString(), this.containerFormat.name().toLowerCase()
+                )
+            );
+        }
 
-            this.sendMessage(226, "Transfer complete.");
-            this.closeDataConnection();
+        this.sendMessage(125, "Opening ASCII mode data connection for file list.");
 
         for (String file : files) {
+            this.sendDataMsgToClient(file);
         }
 
         this.sendMessage(226, "Transfer complete.");
@@ -648,8 +655,10 @@ class FtpClient extends Thread implements Closeable {
     private void command_LIST(String args) {
         if (!this.hasDataConnection()) {
             this.sendMessage(425, "No data connection was established");
+            return;
         }
 
+        List<String> files = new LinkedList<>();
 
         for (Media media : Athena.listMedia()) {
             int day = media.getInfo().getDay();
@@ -659,27 +668,27 @@ class FtpClient extends Thread implements Closeable {
             String monthStr = monthToString(month);
             if (monthStr == null) monthStr = "Jan";
 
-                    monthStr, day, year,
             int year = media.getInfo().getYear();
             if (year <= 0) year = 0;
 
             String ls = String.format(
+                "-rw-r--r-- 1 Athena Media          1337 %s %02d %04d %s [%s].%s",
                 monthStr, day, year,
                 media.getInfo().getTitle(), media.getId(), this.containerFormat.name().toLowerCase()
             );
 
-            this.sendMessage(125, "Opening ASCII mode data connection for file list.");
             files.add(ls);
             this.logger.trace("LIST Entry: %s", ls);
         }
 
-            for (String file : files) {
-                this.sendDataMsgToClient(file);
-            }
+        this.sendMessage(125, "Opening ASCII mode data connection for file list.");
 
-            this.sendMessage(226, "Transfer complete.");
-            this.closeDataConnection();
+        for (String file : files) {
+            this.sendDataMsgToClient(file);
         }
+
+        this.sendMessage(226, "Transfer complete.");
+        this.closeDataConnection();
     }
 
     /**
@@ -743,7 +752,8 @@ class FtpClient extends Thread implements Closeable {
      * included.
      */
     private void command_FEAT() {
-        this.sendMultilineMessage(211, "Extensions supported:", "END"); // Dummy.
+        this.sendMark(211, "Extensions supported:");
+        this.sendMessage(211, "END");
     }
 
     /* -------------------- */
