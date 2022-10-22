@@ -60,6 +60,8 @@ class FtpClient extends Thread implements Closeable {
 
     @Override
     public void run() {
+        this.logger.debug("Connection opened.");
+
         try {
             // Greeting
             this.sendMessage(220, "Welcome to the Athena FTP-Server");
@@ -78,12 +80,12 @@ class FtpClient extends Thread implements Closeable {
     }
 
     private void onCommand(String line) {
+        this.logger.debug("\u2193 %s", line);
+
         // split command and arguments
         int index = line.indexOf(' ');
         String command = ((index == -1) ? line.toUpperCase() : (line.substring(0, index)).toUpperCase());
         String args = ((index == -1) ? null : line.substring(index + 1));
-
-        this.logger.debug("Command: %s, Args: %s", command, args);
 
         // dispatcher mechanism for different commands
         switch (command) {
@@ -183,6 +185,7 @@ class FtpClient extends Thread implements Closeable {
             this.closeDataConnection();
         } catch (IOException ignored) {} finally {
             AthenaFtpServer.openPorts.add(this.dataPort);
+            this.logger.debug("Connection closed.");
         }
     }
 
@@ -204,9 +207,14 @@ class FtpClient extends Thread implements Closeable {
         }
     }
 
+    private void writeControl(String line) {
+        this.controlOutWriter.println(line);
+        this.logger.debug("\u2191 %s", line);
+    }
+
     private void sendMessage(int statusCode, String format, Object... args) {
         String message = String.format(format, args);
-        controlOutWriter.printf("%d %s", statusCode, message);
+        this.writeControl(String.format("%d %s", statusCode, message));
     }
 
     private void sendMultilineMessage(int statusCode, String... messages) {
@@ -215,9 +223,9 @@ class FtpClient extends Thread implements Closeable {
             boolean isLast = idx == messages.length - 1;
 
             if (isLast) {
-                controlOutWriter.printf("%d %s", statusCode, message);
+                this.writeControl(String.format("%d %s", statusCode, message));
             } else {
-                controlOutWriter.printf("%d-%s", statusCode, message);
+                this.writeControl(String.format("%d-%s", statusCode, message));
             }
         }
     }
