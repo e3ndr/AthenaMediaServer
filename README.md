@@ -35,7 +35,7 @@ Some older clients may not support HTML5 video but they may still support Flash 
 | 7+      | Should be supported by the Wii | format=FLV&videoCodec=SPARK&audioCodec=MP3 |
 | 9+      |                                | format=FLV&videoCodec=H264&audioCodec=AAC  |
 
-Your mileage may vary, but in do playaround with things like the quality and let me know what you can get working with Athena! If you're unsure of what your client supports then you can open up [WebMediaTest](https://wmt.e3ndr.xyz/) on your device (or run it locally to bypass https) and start playing the samples.
+Your mileage may vary, but in do play around with the parameters and let me know what you can get working with Athena! If you're unsure of what your client supports then you can open up [WebMediaTest](https://wmt.e3ndr.xyz/) on your device (or run it locally to bypass https) and start playing the samples.
 
 ## Prerequisites
 
