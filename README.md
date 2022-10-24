@@ -1,6 +1,6 @@
 # Athena Media Server
 
-Cool little media server, WIP.
+Cool little media server, WIP :^)
 
 [TODO List](https://github.com/users/e3ndr/projects/1/views/1)
 
@@ -20,7 +20,7 @@ Athena will generate a faux file list when a client connects using the encoding 
 
 | HTTP       | FTP | What is it used for?                                                              | Possible values                          |
 | ---------- | --- | --------------------------------------------------------------------------------- | ---------------------------------------- |
-| format     | f   | Selects a container to be used.                                                   | `MP4`, `FLV`, `OGG`, `WEBM`, `MKV`       |
+| format     | f   | Selects a container to be used.                                                   | `MP4`, `SWF`,`FLV`, `OGG`, `WEBM`, `MKV` |
 | quality    | q   | Sets the video quality.                                                           | `SOURCE`, `UHD`, `FHD`, `HD`, `SD`, `LD` |
 | videoCodec | vc  | Sets the video codec to be used IF the video quality is anything except `SOURCE`. | `H264`, `HEVC`, `SPARK`, `THEORA`, `VP8` |
 | audioCodec | ac  | Sets the audio codec to be used.                                                  | `SOURCE`, `AAC`, `MP3`, `OPUS`           |
