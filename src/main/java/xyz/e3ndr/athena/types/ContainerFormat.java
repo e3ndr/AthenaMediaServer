@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 public enum ContainerFormat {
     // @formatter:off
     MP4  ("mp4",      Arrays.asList("-movflags", "faststart+frag_keyframe")),
+    SWF  ("swf",      Collections.emptyList()),
     FLV  ("flv",      Collections.emptyList()),
     OGG  ("ogg",      Collections.emptyList()),
     WEBM ("webm",     Collections.emptyList()),

@@ -82,7 +82,7 @@ public class Athena {
                 command.add("zerolatency");
             }
 
-            if (desiredContainer == ContainerFormat.FLV) {
+            if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
                 command.add("-maxrate");
                 command.add(String.format("%dK", desiredQuality.bitrate));
             } else {
