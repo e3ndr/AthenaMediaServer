@@ -1,34 +1,27 @@
-package xyz.e3ndr.athena;
+package xyz.e3ndr.athena.transcoding;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.rakurai.json.annotating.JsonClass;
-import co.casterlabs.rakurai.json.annotating.JsonExclude;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 @Getter
 @ToString
 @JsonClass(exposeAll = true)
-public class PlaybackSession {
-
-    @Getter(AccessLevel.NONE)
-    public final String id = UUID.randomUUID().toString().replace("-", "");
-
-    @JsonExclude
-    @ToString.Exclude
-    @Getter(AccessLevel.NONE)
-    public final FastLogger logger = new FastLogger(String.format("PlaybackSession: %s", this.id));
+class TranscodingAnalytics {
+    private static final long START_AFTER = TimeUnit.SECONDS.toMillis(5); // Wait for 5s of footage to be ripped.
 
     private int bitrate = 0;
     private long sentBytes = 0;
     private long currentTime = 0;
-//    private double encodingSpeed = 0;
+    private double encodingSpeed = 0;
 
-    public void parseAndUpdate(String ffmpegLine) {
+    public boolean hasStarted() {
+        return this.currentTime > START_AFTER;
+    }
+
+    public void update(String ffmpegLine) {
         /* frame=14371 fps= 26 q=-1.0 size=  177701kB time=00:09:59.26 bitrate=2429.2kbits/s speed=1.07x */
 
         {
@@ -65,12 +58,12 @@ public class PlaybackSession {
             this.currentTime = totalTime;
         }
 
-//        {
-//            String speedStr = ffmpegLine.split("speed= *")[1].split(" ")[0]; // "1.07x"
-//            speedStr = speedStr.substring(0, speedStr.length() - "x".length());
-//
-//            this.encodingSpeed = Double.parseDouble(speedStr);
-//        }
+        {
+            String speedStr = ffmpegLine.split("speed= *")[1].split(" ")[0]; // "1.07x"
+            speedStr = speedStr.substring(0, speedStr.length() - "x".length());
+
+            this.encodingSpeed = Double.parseDouble(speedStr);
+        }
     }
 
 }

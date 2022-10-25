@@ -14,6 +14,7 @@ public class Config {
     private boolean disableColoredConsole = false;
 
     private String mediaDirectory = "./Media";
+    private String cacheDirectory = "./Cache";
 
     private boolean enableCudaAcceleration;
 
@@ -23,6 +24,10 @@ public class Config {
 
     public File getMediaDirectory() {
         return new File(this.mediaDirectory);
+    }
+
+    public File getCacheDirectory() {
+        return new File(this.cacheDirectory);
     }
 
 }

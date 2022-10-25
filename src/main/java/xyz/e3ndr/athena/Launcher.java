@@ -46,6 +46,17 @@ public class Launcher {
                     System.exit(-1);
                 }
 
+                // cacheDirectory
+                Athena.cacheDirectory = config.getCacheDirectory();
+
+                if (!Athena.cacheDirectory.exists()) {
+                    logger.info("Cache directory doesn't exist, creating it now.");
+                    Athena.cacheDirectory.mkdirs();
+                } else if (!Athena.cacheDirectory.isDirectory()) {
+                    logger.fatal("Cache directory is not actually a directory, crashing.");
+                    System.exit(-1);
+                }
+
                 logger.debug("Using config: %s", config);
             } catch (JsonParseException e) {
                 logger.severe("Unable to parse config file, is it malformed?\n%s", e);

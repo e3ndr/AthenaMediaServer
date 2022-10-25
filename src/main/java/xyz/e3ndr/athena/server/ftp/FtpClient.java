@@ -3,9 +3,7 @@ package xyz.e3ndr.athena.server.ftp;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -590,39 +588,39 @@ class FtpClient extends Thread implements Closeable {
         this.sendMessage(150, "Opening binary mode data connection for requested file %s", file);
 
         AsyncTask.create(() -> {
-            this.activeSendThread = Thread.currentThread();
-
-            try (OutputStream target = this.dataConnection.getOutputStream()) {
-                String mediaId = file                     // The Breakfast Club [IMDB_tt0088847].mp4
-                    .substring(file.lastIndexOf('[') + 1) // IMDB_tt0088847].mp4
-                    .split("]\\.")[0];                    // IMDB_tt0088847
-
-                Media media = Athena.getMedia(mediaId);
-                int[] streamIds = media.getFiles().getStreams().getDefaultStreams();
-
-                // Video
-                try (InputStream videoInputStream = Athena.startStream(
-                    media,
-                    0,
-                    this.videoQuality, this.videoCodec, this.audioCodec, this.containerFormat,
-                    streamIds
-                )) {
-                    // Stream it!
-                    byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
-                    int read = 0;
-
-                    while ((read = videoInputStream.read(buffer)) != -1) {
-                        target.write(buffer, 0, read);
-                        target.flush();
-                    }
-
-                    this.sendMessage(226, "File transfer successful, closing data connection");
-                }
-            } catch (IOException e) {
-                this.logger.exception(e);
-            } finally {
-                this.closeDataConnection();
-            }
+//            this.activeSendThread = Thread.currentThread();
+//
+//            try (OutputStream target = this.dataConnection.getOutputStream()) {
+//                String mediaId = file                     // The Breakfast Club [IMDB_tt0088847].mp4
+//                    .substring(file.lastIndexOf('[') + 1) // IMDB_tt0088847].mp4
+//                    .split("]\\.")[0];                    // IMDB_tt0088847
+//
+//                Media media = Athena.getMedia(mediaId);
+//                int[] streamIds = media.getFiles().getStreams().getDefaultStreams();
+//
+//                // Video
+//                try (InputStream videoInputStream = Athena.startStream(
+//                    media,
+//                    0,
+//                    this.videoQuality, this.videoCodec, this.audioCodec, this.containerFormat,
+//                    streamIds
+//                )) {
+//                    // Stream it!
+//                    byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
+//                    int read = 0;
+//
+//                    while ((read = videoInputStream.read(buffer)) != -1) {
+//                        target.write(buffer, 0, read);
+//                        target.flush();
+//                    }
+//
+//                    this.sendMessage(226, "File transfer successful, closing data connection");
+//                }
+//            } catch (IOException e) {
+//                this.logger.exception(e);
+//            } finally {
+            this.closeDataConnection();
+//            }
         });
     }
 
