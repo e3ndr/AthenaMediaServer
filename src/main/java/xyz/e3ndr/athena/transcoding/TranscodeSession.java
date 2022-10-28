@@ -19,7 +19,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @Getter
 @ToString
 @JsonClass(exposeAll = true)
-class TranscodingSession {
+public class TranscodeSession {
     private String file;
     private VideoQuality videoQuality;
     private VideoCodec videoCodec;
@@ -34,7 +34,7 @@ class TranscodingSession {
 
     private @Setter boolean isComplete;
 
-    public TranscodingSession(File targetFile, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+    public TranscodeSession(File targetFile, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         this.file = targetFile.toString();
         this.videoQuality = desiredQuality;
         this.videoCodec = desiredVCodec;

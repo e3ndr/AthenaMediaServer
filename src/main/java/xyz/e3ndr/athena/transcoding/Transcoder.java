@@ -24,7 +24,7 @@ import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Transcoder {
-    public static List<TranscodingSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
+    public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
 
     @SneakyThrows
     public static void start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
@@ -91,7 +91,7 @@ public class Transcoder {
         final FastLogger logger = new FastLogger("Transcode: ".concat(targetFile.toString()));
 
         PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
-        TranscodingSession session = new TranscodingSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        TranscodeSession session = new TranscodeSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
 
         transcodeSessions.add(session);
 
