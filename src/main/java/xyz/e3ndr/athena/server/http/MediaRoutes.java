@@ -34,6 +34,7 @@ class MediaRoutes implements HttpProvider {
         VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", "H264").toUpperCase());
         AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", "SOURCE").toUpperCase());
         ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", "MKV").toUpperCase());
+        String forceMime = query.get("forceMime");
 
         // Parse out the streamIds.
         int[] streamIds = null;
@@ -77,9 +78,14 @@ class MediaRoutes implements HttpProvider {
         // stream the file. Very funky behavior.
 
         // Response.
-        String mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
-        if (containerFormat == ContainerFormat.MKV) {
-            mimeType = mimeType.replace("mkv", "x-matroska");
+        String mimeType;
+
+        if (forceMime != null) {
+            mimeType = forceMime;
+        } else if (containerFormat == ContainerFormat.MKV) {
+            mimeType = "video/x-matroska";
+        } else {
+            mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
         }
 
         HttpResponse resp = HttpResponse
