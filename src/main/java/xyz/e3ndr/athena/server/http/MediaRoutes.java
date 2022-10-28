@@ -2,7 +2,6 @@ package xyz.e3ndr.athena.server.http;
 
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.UUID;
 
 import co.casterlabs.rakurai.io.http.HttpResponse;
 import co.casterlabs.rakurai.io.http.HttpResponse.ResponseContent;
@@ -19,7 +18,6 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.reflectionlib.ReflectionLib;
 
 class MediaRoutes implements HttpProvider {
@@ -101,9 +99,6 @@ class MediaRoutes implements HttpProvider {
             containerFormat,
             streamIds
         );
-
-        FastLogger logger = new FastLogger(String.format("Streaming Session: %x", UUID.randomUUID().toString().hashCode()));
-        logger.debug("Started stream at %d.", startAt);
 
         // Intercept the OutputStream, do our own write routines.
         long $_startAt = startAt;
