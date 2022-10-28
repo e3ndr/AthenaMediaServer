@@ -1,9 +1,6 @@
 package xyz.e3ndr.athena.server.http;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,6 +13,7 @@ import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 import lombok.SneakyThrows;
 import xyz.e3ndr.athena.Athena;
+import xyz.e3ndr.athena.MediaSession;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
@@ -96,64 +94,23 @@ class MediaRoutes implements HttpProvider {
         }
 
         // Load the file.
-        FileChannel fc = Athena.startStream(
+        MediaSession mediaSession = Athena.startStream(
             media,
             videoQuality,
             videoCodec, audioCodec,
             containerFormat,
             streamIds
         );
-        if (requestedRange) {
-            fc.position(startAt);
-        }
 
         FastLogger logger = new FastLogger(String.format("Streaming Session: %x", UUID.randomUUID().toString().hashCode()));
         logger.debug("Started stream at %d.", startAt);
 
         // Intercept the OutputStream, do our own write routines.
+        long $_startAt = startAt;
         ReflectionLib.setValue(resp, "content", new ResponseContent<Void>() {
             @Override
             public void write(OutputStream out) {
-                try (fc; out) {
-                    final int MAX_FAILS = 100; // ~10s
-
-                    ByteBuffer buffer = ByteBuffer.allocate(Athena.STREAMING_BUFFER_SIZE);
-                    byte[] bufferArray = buffer.array();
-                    int failCount = 0;
-                    int bytesWritten = 0;
-
-                    while (bytesWritten < chunkLength) {
-                        int read = fc.read(buffer);
-
-                        if (read <= 0) {
-                            failCount++;
-
-                            if (failCount == MAX_FAILS) {
-                                logger.debug("Ending session, out of data.");
-                                break; // We're finished, oof.
-                            } else {
-                                // Try to wait for more data to get buffered.
-//                                logger.debug("Out of data! Sleeping.");
-                                Thread.sleep(100);
-                                continue;
-                            }
-                        } else {
-                            failCount = 0;
-                        }
-
-                        out.write(bufferArray, 0, read);
-                        out.flush();
-                        buffer.clear();
-
-                        bytesWritten += read;
-
-                        logger.trace("Wrote data! %d bytes sent so far.", bytesWritten);
-                    }
-
-                    logger.debug("Ended stream, target reached.");
-                } catch (IOException | InterruptedException e) {
-                    logger.debug("Ended stream, exception: %s: %s", e.getClass().getSimpleName(), e.getMessage());
-                }
+                mediaSession.start($_startAt, chunkLength, out);
             }
 
             @Override

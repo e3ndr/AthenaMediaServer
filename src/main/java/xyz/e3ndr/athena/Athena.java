@@ -2,15 +2,14 @@ package xyz.e3ndr.athena;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.EnumSet;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import co.casterlabs.rakurai.json.Rson;
+import xyz.e3ndr.athena.transcoding.TranscodeSession;
 import xyz.e3ndr.athena.transcoding.Transcoder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
@@ -30,6 +29,7 @@ public class Athena {
 
     public static boolean enableCudaAcceleration;
 
+    public static List<MediaSession> mediaSessions = Collections.synchronizedList(new LinkedList<>());
     public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
 
     public static Media getMedia(String mediaId) throws IOException {
@@ -39,14 +39,15 @@ public class Athena {
         return Rson.DEFAULT.fromJson(mediaIndex, Media.class);
     }
 
-    public static FileChannel startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
+    public static MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
         final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        TranscodeSession transcodeSession = null;
 
         if (!cacheFile.exists()) {
-            Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+            transcodeSession = Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
         }
 
-        return FileChannel.open(cacheFile.toPath(), EnumSet.of(StandardOpenOption.READ));
+        return new MediaSession(cacheFile, transcodeSession, media.getId(), desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
     }
 
     public static boolean authenticate(String token) {

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,10 +22,9 @@ import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 
 public class Transcoder {
-    public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
 
     @SneakyThrows
-    public static void start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+    public static TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         List<String> command = new LinkedList<>();
         command.add("ffmpeg");
         command.add("-hide_banner");
@@ -155,6 +153,8 @@ public class Transcoder {
         });
 
         startPromise.await(); // Wait for the session to start.
+
+        return session;
     }
 
     public static File getFile(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {

@@ -8,14 +8,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.LinkedList;
 import java.util.List;
 
 import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.commons.async.PromiseWithHandles;
 import xyz.e3ndr.athena.Athena;
+import xyz.e3ndr.athena.MediaSession;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
@@ -618,60 +617,23 @@ class FtpClient extends Thread implements Closeable {
             try (OutputStream target = this.dataConnection.getOutputStream()) {
                 String mediaId = file                     // The Breakfast Club [IMDB_tt0088847].mp4
                     .substring(file.lastIndexOf('[') + 1) // IMDB_tt0088847].mp4
-                    .split("]")[0];                    // IMDB_tt0088847
+                    .split("]")[0];                       // IMDB_tt0088847
 
                 Media media = Athena.getMedia(mediaId);
                 int[] streamIds = media.getFiles().getStreams().getDefaultStreams();
 
-                // Video
-                try (FileChannel fc = Athena.startStream(
+                MediaSession session = Athena.startStream(
                     media,
                     this.videoQuality,
                     this.videoCodec, this.audioCodec,
                     this.containerFormat,
                     streamIds
-                )) {
-                    fc.position(skip);
+                );
 
-                    // Stream it!
-                    final int MAX_FAILS = 100; // ~10s
+                session.start(skip, Long.MAX_VALUE, target);
 
-                    ByteBuffer buffer = ByteBuffer.allocate(Athena.STREAMING_BUFFER_SIZE);
-                    byte[] bufferArray = buffer.array();
-                    int failCount = 0;
-                    int bytesWritten = 0;
-
-                    while (true) {
-                        int read = fc.read(buffer);
-
-                        if (read <= 0) {
-                            failCount++;
-
-                            if (failCount == MAX_FAILS) {
-                                this.logger.debug("Ending session, out of data.");
-                                break; // We're finished, oof.
-                            } else {
-                                // Try to wait for more data to get buffered.
-//                                logger.debug("Out of data! Sleeping.");
-                                Thread.sleep(100);
-                                continue;
-                            }
-                        } else {
-                            failCount = 0;
-                        }
-
-                        target.write(bufferArray, 0, read);
-                        target.flush();
-                        buffer.clear();
-
-                        bytesWritten += read;
-
-                        this.logger.trace("Wrote data! %d bytes sent so far.", bytesWritten);
-                    }
-
-                    this.sendMessage(226, "File transfer successful, closing data connection");
-                }
-            } catch (IOException | InterruptedException e) {
+                this.sendMessage(226, "File transfer successful, closing data connection");
+            } catch (IOException e) {
                 this.logger.debug("Ended stream, exception: %s: %s", e.getClass().getSimpleName(), e.getMessage());
                 this.sendMessage(451, "File transfer aborted");
             } finally {
