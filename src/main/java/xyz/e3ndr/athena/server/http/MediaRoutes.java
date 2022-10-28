@@ -120,6 +120,7 @@ class MediaRoutes implements HttpProvider {
 
             @Override
             public long getLength() {
+                return chunkLength;
             }
 
             @Override
