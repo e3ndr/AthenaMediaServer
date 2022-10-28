@@ -21,7 +21,6 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Transcoder {
     public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
@@ -88,10 +87,8 @@ public class Transcoder {
             .start();
 
         /* ---- Session & Analytics ---- */
-        final FastLogger logger = new FastLogger("Transcode: ".concat(targetFile.toString()));
-
-        PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
         TranscodeSession session = new TranscodeSession(media.getId(), targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
 
         Athena.transcodeSessions.add(session);
 
@@ -104,19 +101,19 @@ public class Transcoder {
 
                 String line = null;
                 while ((line = stdout.nextLine()) != null) {
-                    logger.trace(line);
+                    session.logger.trace(line);
 
                     if (line.startsWith("frame=")) {
                         if (!hasStarted) {
                             session.init(initInfoBuilder);
                             initInfoBuilder = null;
                             hasStarted = true;
-                            logger.debug("Started!");
+                            session.logger.debug("Started!");
                             startPromise.resolve(null);
                         }
 
                         session.processStatistic(line);
-                        logger.debug(session);
+                        session.logger.debug(session);
                     } else if (initInfoBuilder != null) {
                         // This gets set to null after the video starts.
                         initInfoBuilder.add(line);
@@ -149,10 +146,10 @@ public class Transcoder {
                     fos.flush();
                 }
             } catch (IOException e) {
-                logger.exception(e);
+                session.logger.exception(e);
             } finally {
                 Athena.transcodeSessions.remove(session);
-                logger.debug("Stopped transcode.");
+                session.logger.debug("Stopped transcode.");
                 proc.destroy();
             }
         });

@@ -3,9 +3,12 @@ package xyz.e3ndr.athena.transcoding;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.rakurai.json.annotating.JsonClass;
+import co.casterlabs.rakurai.json.annotating.JsonExclude;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,6 +23,8 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 @ToString
 @JsonClass(exposeAll = true)
 public class TranscodeSession {
+    private final String id = UUID.randomUUID().toString().replace("-", "");
+
     private String mediaId;
     private String file;
     private VideoQuality videoQuality;
@@ -34,6 +39,10 @@ public class TranscodeSession {
     private double encodingSpeed = 0;
 
     private @Setter boolean isComplete;
+
+    @JsonExclude
+    @Getter(AccessLevel.NONE)
+    public final FastLogger logger = new FastLogger("Transcode Session: ".concat(this.id));
 
     public TranscodeSession(String mediaId, File targetFile, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         this.mediaId = mediaId;
@@ -186,6 +195,11 @@ public class TranscodeSession {
         totalTime += TimeUnit.HOURS.toMillis(hours);
 
         return totalTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
     }
 
 }
