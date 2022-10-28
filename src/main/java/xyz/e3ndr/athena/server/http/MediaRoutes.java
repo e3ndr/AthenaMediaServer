@@ -24,7 +24,7 @@ import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.reflectionlib.ReflectionLib;
 
-class StreamingRoute implements HttpProvider {
+class MediaRoutes implements HttpProvider {
 
     @SneakyThrows
     @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/raw")
