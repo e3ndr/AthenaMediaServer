@@ -11,6 +11,18 @@ Cool little media server, WIP :^)
 -   Fast and light-weight.
 -   Can stream media over FTP or HTTP, with transcoding enabled on both.
 -   Supports CUDA/NVENC acceleration.
+-   Supports WiiMC.
+
+### WiiMC
+
+Just add these two lines to your `onlinemedia.xml` file:
+
+```xml
+<link name="Athena Media Server - Search" type="search" addr="http://localhost:8080/v1/athena/api/wiimc/search?q="/>
+<link name="Athena Media Server" addr="http://localhost:8080/v1/athena/api/wiimc/list"/>
+```
+
+[Here's](https://i.e3ndr.xyz/1mBTjdAJwr8M__1666969284/WiiMC%20Support.mp4) what it looks like in action.
 
 ### How does FTP Streaming work?
 

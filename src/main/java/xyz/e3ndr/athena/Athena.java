@@ -59,7 +59,33 @@ public class Athena {
 
         for (String mediaId : mediaDirectory.list()) {
             try {
-                result.add(getMedia(mediaId));;
+                result.add(getMedia(mediaId));
+            } catch (IOException ignored) {}
+        }
+
+        return result;
+    }
+
+    public static List<Media> searchMedia(String query) {
+        query = query
+            .toLowerCase()
+            .trim();
+
+        if (query.length() == 0) {
+            return listMedia();
+        }
+
+        List<Media> result = new LinkedList<>();
+
+        for (String mediaId : mediaDirectory.list()) {
+            try {
+                Media media = getMedia(mediaId);
+
+                // TODO a better search.
+                if (media.getInfo().getTitle().toLowerCase().contains(query) ||
+                    media.getInfo().getSummary().toLowerCase().contains(query)) {
+                    result.add(media);
+                }
             } catch (IOException ignored) {}
         }
 
