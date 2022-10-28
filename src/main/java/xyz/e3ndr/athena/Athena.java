@@ -23,6 +23,7 @@ public class Athena {
     public static final String STREAM_FORMAT_FF = "matroska";
 
     public static final int STREAMING_BUFFER_SIZE = 64/*kb*/ * 1000;
+    public static final int TRANSCODING_BUFFER_SIZE = 512/*kb*/ * 1000;
 
     public static File mediaDirectory;
     public static File cacheDirectory;

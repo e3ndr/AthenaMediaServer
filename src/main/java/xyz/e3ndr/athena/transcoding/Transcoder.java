@@ -71,7 +71,7 @@ public class Transcoder {
 
         /* ---- Format & Output ---- */
         command.add("-bufsize");
-        command.add(String.valueOf(Athena.STREAMING_BUFFER_SIZE));
+        command.add(String.valueOf(Athena.TRANSCODING_BUFFER_SIZE));
 
         command.addAll(desiredContainer.flags);
         command.add("-f");
@@ -102,7 +102,7 @@ public class Transcoder {
 
                     if (line.startsWith("frame=")) {
                         analytics.update(line);
-                        logger.trace(analytics);
+                        logger.debug(analytics);
 
                         if (!hasStarted && analytics.hasStarted()) {
                             logger.debug("Started!");
@@ -126,7 +126,7 @@ public class Transcoder {
             try (FileOutputStream fos = new FileOutputStream(targetFile)) {
                 InputStream pipe = proc.getInputStream();
 
-                byte[] buffer = new byte[Athena.STREAMING_BUFFER_SIZE];
+                byte[] buffer = new byte[Athena.TRANSCODING_BUFFER_SIZE];
                 int read = 0;
 
                 while ((read = pipe.read(buffer)) != -1) {

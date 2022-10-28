@@ -10,10 +10,10 @@ import lombok.ToString;
 @ToString
 @JsonClass(exposeAll = true)
 class TranscodingAnalytics {
-    private static final long START_AFTER = TimeUnit.SECONDS.toMillis(5); // Wait for 5s of footage to be ripped.
+    private static final long START_AFTER = TimeUnit.SECONDS.toMillis(1); // Wait for 1s of footage to be ripped.
 
     private int bitrate = 0;
-    private long sentBytes = 0;
+    private long bytesWritten = 0;
     private long currentTime = 0;
     private double encodingSpeed = 0;
 
@@ -37,7 +37,7 @@ class TranscodingAnalytics {
             String sizeStr = ffmpegLine.split("size= *")[1].split(" ")[0]; // "177701kB"
             sizeStr = sizeStr.substring(0, sizeStr.length() - "kB".length());
 
-            this.sentBytes = Long.parseLong(sizeStr) * 1000;
+            this.bytesWritten = Long.parseLong(sizeStr) * 1000;
         }
 
         {
