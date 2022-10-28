@@ -93,7 +93,7 @@ public class Transcoder {
         PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
         TranscodeSession session = new TranscodeSession(media.getId(), targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
 
-        transcodeSessions.add(session);
+        Athena.transcodeSessions.add(session);
 
         AsyncTask.create(() -> {
             Scanner stdout = new Scanner(proc.getErrorStream());
@@ -151,7 +151,7 @@ public class Transcoder {
             } catch (IOException e) {
                 logger.exception(e);
             } finally {
-                transcodeSessions.remove(session);
+                Athena.transcodeSessions.remove(session);
                 logger.debug("Stopped transcode.");
                 proc.destroy();
             }

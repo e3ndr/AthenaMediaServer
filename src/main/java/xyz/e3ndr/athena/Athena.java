@@ -30,6 +30,8 @@ public class Athena {
 
     public static boolean enableCudaAcceleration;
 
+    public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
+
     public static Media getMedia(String mediaId) throws IOException {
         File mediaIndexFile = new File(mediaDirectory, mediaId.concat("/index.json"));
         String mediaIndex = Files.readString(mediaIndexFile.toPath(), StandardCharsets.UTF_8);

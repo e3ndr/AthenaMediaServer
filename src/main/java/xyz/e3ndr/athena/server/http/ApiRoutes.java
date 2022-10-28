@@ -6,7 +6,7 @@ import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
-import xyz.e3ndr.athena.transcoding.Transcoder;
+import xyz.e3ndr.athena.Athena;
 
 class ApiRoutes implements HttpProvider {
 
@@ -14,7 +14,7 @@ class ApiRoutes implements HttpProvider {
     public HttpResponse onListTranscodes(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
-            Rson.DEFAULT.toJson(Transcoder.transcodeSessions)
+            Rson.DEFAULT.toJson(Athena.transcodeSessions)
         );
     }
 
