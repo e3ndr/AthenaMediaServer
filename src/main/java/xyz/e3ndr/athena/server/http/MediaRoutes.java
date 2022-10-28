@@ -73,10 +73,6 @@ class MediaRoutes implements HttpProvider {
 
         long chunkLength = endAt - startAt;
 
-        // TODO figure out why browsers are still uneasy about streaming video.
-        // Seems that sometimes you can get them to seek and sometimes they just want to
-        // stream the file. Very funky behavior.
-
         // Response.
         String mimeType;
 
