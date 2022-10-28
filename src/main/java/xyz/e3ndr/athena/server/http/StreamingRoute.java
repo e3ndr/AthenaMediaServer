@@ -88,6 +88,7 @@ class StreamingRoute implements HttpProvider {
             )
             .setMimeType(mimeType)
             .putHeader("Accept-Ranges", "bytes")
+            .putHeader("Cache-Control", "no-store, no-cache, no-transform")
             .putHeader("ETag", Integer.toHexString(media.getId().hashCode()));
 
         if (requestedRange) {
