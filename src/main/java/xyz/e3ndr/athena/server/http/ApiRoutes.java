@@ -18,4 +18,12 @@ class ApiRoutes implements HttpProvider {
         );
     }
 
+    @HttpEndpoint(uri = "/v1/athena/api/sessions")
+    public HttpResponse onListSessions(SoraHttpSession session) {
+        return HttpResponse.newFixedLengthResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(Athena.mediaSessions)
+        );
+    }
+
 }
