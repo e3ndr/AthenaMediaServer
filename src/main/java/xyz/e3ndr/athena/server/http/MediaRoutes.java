@@ -147,7 +147,7 @@ class MediaRoutes implements HttpProvider {
 
                         bytesWritten += read;
 
-                        logger.debug("Wrote data! %d bytes sent so far.", bytesWritten);
+                        logger.trace("Wrote data! %d bytes sent so far.", bytesWritten);
                     }
 
                     logger.debug("Ended stream, target reached.");

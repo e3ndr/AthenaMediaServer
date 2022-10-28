@@ -666,7 +666,7 @@ class FtpClient extends Thread implements Closeable {
 
                         bytesWritten += read;
 
-                        this.logger.debug("Wrote data! %d bytes sent so far.", bytesWritten);
+                        this.logger.trace("Wrote data! %d bytes sent so far.", bytesWritten);
                     }
 
                     this.sendMessage(226, "File transfer successful, closing data connection");
