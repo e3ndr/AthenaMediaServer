@@ -49,9 +49,14 @@ class MediaRoutes implements HttpProvider {
             streamIds = media.getFiles().getStreams().getDefaultStreams();
         }
 
+        // Making this a huge number prevents browsers from seeking to the end of the
+        // file in search of a time header/atom/embl cue. They will fallback on a
+        // brute-force approach where they guess which byte to start at.
+        final long fileLength = Long.MAX_VALUE;
+
         // Figure out the requested range, if any.
         long startAt = 0;
-        long endAt = Long.MAX_VALUE;
+        long endAt = fileLength - 1;
         boolean requestedRange = false;
 
         String rangeHeader = session.getHeader("range");
@@ -88,7 +93,7 @@ class MediaRoutes implements HttpProvider {
             .putHeader("ETag", Integer.toHexString(media.getId().hashCode()));
 
         if (requestedRange) {
-            resp.putHeader("Content-Range", String.format("bytes %d-%d/*", startAt, endAt - 1));
+            resp.putHeader("Content-Range", String.format("bytes %d-%d/%d", startAt, endAt, fileLength));
         }
 
         // Load the file.
@@ -110,12 +115,11 @@ class MediaRoutes implements HttpProvider {
 
             @Override
             public TransferEncoding getEncoding() {
-                return TransferEncoding.CHUNKED;
+                return TransferEncoding.FIXED_LENGTH;
             }
 
             @Override
             public long getLength() {
-                return -1;
             }
 
             @Override
