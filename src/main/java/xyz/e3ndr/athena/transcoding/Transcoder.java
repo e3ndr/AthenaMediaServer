@@ -91,7 +91,7 @@ public class Transcoder {
         final FastLogger logger = new FastLogger("Transcode: ".concat(targetFile.toString()));
 
         PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
-        TranscodeSession session = new TranscodeSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        TranscodeSession session = new TranscodeSession(media.getId(), targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
 
         transcodeSessions.add(session);
 
