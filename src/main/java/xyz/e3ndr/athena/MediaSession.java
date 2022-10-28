@@ -67,7 +67,10 @@ public class MediaSession {
             FileChannel fileChannel = FileChannel.open(this.file.toPath(), EnumSet.of(StandardOpenOption.READ));
             target //
         ) {
-            fileChannel.position(skip);
+            if (skip > 0) {
+                fileChannel.position(skip);
+            }
+
             this.logger.debug("Started stream at %d.", skip);
 
             ByteBuffer buffer = ByteBuffer.allocate(Athena.STREAMING_BUFFER_SIZE);
