@@ -91,9 +91,9 @@ public class Transcoder {
         final FastLogger logger = new FastLogger("Transcode: ".concat(targetFile.toString()));
 
         PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
-        TranscodingSession analytics = new TranscodingSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        TranscodingSession session = new TranscodingSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
 
-        transcodeSessions.add(analytics);
+        transcodeSessions.add(session);
 
         AsyncTask.create(() -> {
             Scanner stdout = new Scanner(proc.getErrorStream());
@@ -108,24 +108,28 @@ public class Transcoder {
 
                     if (line.startsWith("frame=")) {
                         if (!hasStarted) {
-                            analytics.init(initInfoBuilder);
+                            session.init(initInfoBuilder);
                             initInfoBuilder = null;
                             hasStarted = true;
                             logger.debug("Started!");
                             startPromise.resolve(null);
                         }
 
-                        analytics.processStatistic(line);
-                        logger.debug(analytics);
+                        session.processStatistic(line);
+                        logger.debug(session);
                     } else if (initInfoBuilder != null) {
                         // This gets set to null after the video starts.
                         initInfoBuilder.add(line);
                     }
                 }
-            } catch (NoSuchElementException ignored) {} finally {
+            } catch (NoSuchElementException ignored) {
+                // Ignored.
+            } finally {
                 if (!hasStarted) {
                     startPromise.resolve(null); // Just in case...
                 }
+
+                session.setComplete(true);
             }
         });
 
@@ -147,7 +151,7 @@ public class Transcoder {
             } catch (IOException e) {
                 logger.exception(e);
             } finally {
-                transcodeSessions.remove(analytics);
+                transcodeSessions.remove(session);
                 logger.debug("Stopped transcode.");
                 proc.destroy();
             }

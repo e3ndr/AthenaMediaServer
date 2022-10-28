@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.rakurai.json.annotating.JsonClass;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
@@ -30,6 +31,8 @@ class TranscodingSession {
     private long bytesWritten = 0;
     private double encodingProgress = 0;
     private double encodingSpeed = 0;
+
+    private @Setter boolean isComplete;
 
     public TranscodingSession(File targetFile, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         this.file = targetFile.toString();
