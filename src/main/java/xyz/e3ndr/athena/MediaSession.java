@@ -31,14 +31,14 @@ public class MediaSession {
 
     private final String id = UUID.randomUUID().toString().replace("-", "");
 
+    private @Nullable TranscodeSession transcodeSession; // Null means there was a cached version available.
+    private boolean isCached;
+
     private String mediaId;
     private VideoQuality videoQuality;
     private VideoCodec videoCodec;
     private AudioCodec audioCodec;
     private int[] streamIds;
-    private long duration;
-
-    private @Nullable TranscodeSession transcodeSession; // Null means there was a cached version available.
 
     private long bytesWritten = 0;
 
@@ -52,6 +52,7 @@ public class MediaSession {
     public MediaSession(File file, @Nullable TranscodeSession transcodeSession, String mediaId, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
         this.file = file;
         this.transcodeSession = transcodeSession;
+        this.isCached = this.transcodeSession == null;
         this.mediaId = mediaId;
         this.videoQuality = desiredQuality;
         this.videoCodec = desiredVCodec;
