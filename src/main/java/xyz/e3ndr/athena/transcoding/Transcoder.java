@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -23,6 +24,7 @@ import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Transcoder {
+    public static List<TranscodingSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());
 
     @SneakyThrows
     public static void start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
@@ -89,26 +91,35 @@ public class Transcoder {
         final FastLogger logger = new FastLogger("Transcode: ".concat(targetFile.toString()));
 
         PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
-        TranscodingAnalytics analytics = new TranscodingAnalytics();
+        TranscodingSession analytics = new TranscodingSession(targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+
+        transcodeSessions.add(analytics);
 
         AsyncTask.create(() -> {
             Scanner stdout = new Scanner(proc.getErrorStream());
             boolean hasStarted = false;
 
             try {
+                List<String> initInfoBuilder = new LinkedList<>();
+
                 String line = null;
                 while ((line = stdout.nextLine()) != null) {
                     logger.trace(line);
 
                     if (line.startsWith("frame=")) {
-                        analytics.update(line);
-                        logger.debug(analytics);
-
-                        if (!hasStarted && analytics.hasStarted()) {
-                            logger.debug("Started!");
+                        if (!hasStarted) {
+                            analytics.init(initInfoBuilder);
+                            initInfoBuilder = null;
                             hasStarted = true;
+                            logger.debug("Started!");
                             startPromise.resolve(null);
                         }
+
+                        analytics.processStatistic(line);
+                        logger.debug(analytics);
+                    } else if (initInfoBuilder != null) {
+                        // This gets set to null after the video starts.
+                        initInfoBuilder.add(line);
                     }
                 }
             } catch (NoSuchElementException ignored) {} finally {
@@ -136,6 +147,7 @@ public class Transcoder {
             } catch (IOException e) {
                 logger.exception(e);
             } finally {
+                transcodeSessions.remove(analytics);
                 logger.debug("Stopped transcode.");
                 proc.destroy();
             }
