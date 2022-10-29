@@ -10,6 +10,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.Nullable;
+
 import co.casterlabs.rakurai.json.Rson;
 import xyz.e3ndr.athena.transcoding.TranscodeSession;
 import xyz.e3ndr.athena.transcoding.Transcoder;
