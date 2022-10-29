@@ -5,7 +5,6 @@ import java.util.Map;
 
 import co.casterlabs.rakurai.io.http.HttpResponse;
 import co.casterlabs.rakurai.io.http.HttpResponse.ResponseContent;
-import co.casterlabs.rakurai.io.http.HttpResponse.TransferEncoding;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
@@ -18,7 +17,6 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
-import xyz.e3ndr.reflectionlib.ReflectionLib;
 
 class MediaRoutes implements HttpProvider {
 
@@ -84,20 +82,6 @@ class MediaRoutes implements HttpProvider {
             mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
         }
 
-        HttpResponse resp = HttpResponse
-            .newFixedLengthResponse(
-                requestedRange ? StandardHttpStatus.PARTIAL_CONTENT : StandardHttpStatus.OK,
-                HttpResponse.EMPTY_BODY
-            )
-            .setMimeType(mimeType)
-            .putHeader("Accept-Ranges", "bytes")
-            .putHeader("Cache-Control", "no-store, no-cache, no-transform")
-            .putHeader("ETag", Integer.toHexString(media.getId().hashCode()));
-
-        if (requestedRange) {
-            resp.putHeader("Content-Range", String.format("bytes %d-%d/%d", startAt, endAt, fileLength));
-        }
-
         // Load the file.
         MediaSession mediaSession = Athena.startStream(
             media,
@@ -107,29 +91,30 @@ class MediaRoutes implements HttpProvider {
             streamIds
         );
 
-        // Intercept the OutputStream, do our own write routines.
         long $_startAt = startAt;
-        ReflectionLib.setValue(resp, "content", new ResponseContent<Void>() {
-            @Override
-            public void write(OutputStream out) {
-                mediaSession.start($_startAt, chunkLength, out);
-            }
+        HttpResponse resp = new HttpResponse(
+            new ResponseContent() {
+                @Override
+                public void write(OutputStream out) {
+                    // We do our own write routines.
+                    mediaSession.start($_startAt, chunkLength, out);
+                }
 
-            @Override
-            public TransferEncoding getEncoding() {
-                return TransferEncoding.FIXED_LENGTH;
-            }
+                @Override
+                public long getLength() {
+                    return chunkLength;
+                }
+            },
+            requestedRange ? StandardHttpStatus.PARTIAL_CONTENT : StandardHttpStatus.OK
+        )
+            .setMimeType(mimeType)
+            .putHeader("Accept-Ranges", "bytes")
+            .putHeader("Cache-Control", "no-store, no-cache, no-transform")
+            .putHeader("ETag", Integer.toHexString(media.getId().hashCode()));
 
-            @Override
-            public long getLength() {
-                return chunkLength;
-            }
-
-            @Override
-            public Void raw() {
-                return null;
-            }
-        });
+        if (requestedRange) {
+            resp.putHeader("Content-Range", String.format("bytes %d-%d/%d", startAt, endAt, fileLength));
+        }
 
         return resp;
     }
