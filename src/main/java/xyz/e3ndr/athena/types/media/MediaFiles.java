@@ -1,5 +1,6 @@
 package xyz.e3ndr.athena.types.media;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -29,16 +30,13 @@ public class MediaFiles {
     public static class Streams {
         private int[] defaultStreams;
 
-        private List<Video> video;
-        private List<Audio> audio;
+        private List<VideoStream> video;
+        private List<AudioStream> audio;
 
         @Getter
         @NonNull
         @JsonClass(exposeAll = true)
-        public static class Video {
-            private int id;
-            private String codec;
-            private String quality;
+        public static class VideoStream extends Stream {
             private int frameRate;
             private int width;
             private int height;
@@ -48,12 +46,19 @@ public class MediaFiles {
         @Getter
         @NonNull
         @JsonClass(exposeAll = true)
-        public static class Audio {
-            private String name;
-            private int id;
-            private String codec;
+        public static class AudioStream extends Stream {
             private String language;
             private int channels;
+
+        }
+
+        @Getter
+        @NonNull
+        @JsonClass(exposeAll = true)
+        public static abstract class Stream {
+            private int id;
+            private String name;
+            private String codec;
 
         }
 
