@@ -33,6 +33,13 @@ public class MediaFiles {
         private List<VideoStream> video;
         private List<AudioStream> audio;
 
+        public List<Stream> getAll() {
+            List<Stream> all = new ArrayList<>(this.video.size() + this.audio.size());
+            all.addAll(this.video);
+            all.addAll(this.audio);
+            return all;
+        }
+
         @Getter
         @NonNull
         @JsonClass(exposeAll = true)

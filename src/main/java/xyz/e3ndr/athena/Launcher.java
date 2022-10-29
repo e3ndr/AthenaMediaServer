@@ -37,7 +37,6 @@ public class Launcher {
 
                 // mediaDirectory
                 Athena.mediaDirectory = config.getMediaDirectory();
-
                 if (!Athena.mediaDirectory.exists()) {
                     logger.info("Media directory doesn't exist, creating it now.");
                     Athena.mediaDirectory.mkdirs();
@@ -48,7 +47,6 @@ public class Launcher {
 
                 // cacheDirectory
                 Athena.cacheDirectory = config.getCacheDirectory();
-
                 if (!Athena.cacheDirectory.exists()) {
                     logger.info("Cache directory doesn't exist, creating it now.");
                     Athena.cacheDirectory.mkdirs();
@@ -56,6 +54,19 @@ public class Launcher {
                     logger.fatal("Cache directory is not actually a directory, crashing.");
                     System.exit(-1);
                 }
+
+                // ingestDirectory
+                Athena.ingestDirectory = config.getIngestDirectory();
+                if (!Athena.ingestDirectory.exists()) {
+                    logger.info("Ingest directory doesn't exist, creating it now.");
+                    Athena.ingestDirectory.mkdirs();
+                } else if (!Athena.ingestDirectory.isDirectory()) {
+                    logger.fatal("Ingest directory is not actually a directory, crashing.");
+                    System.exit(-1);
+                }
+
+                // omdbApiKey
+                Athena.omdbApiKey = config.getOmdbApiKey();
 
                 logger.debug("Using config: %s", config);
             } catch (JsonParseException e) {

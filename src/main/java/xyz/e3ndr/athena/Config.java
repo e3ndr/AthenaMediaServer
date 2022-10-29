@@ -15,6 +15,9 @@ public class Config {
 
     private String mediaDirectory = "./Media";
     private String cacheDirectory = "./Cache";
+    private String ingestDirectory = "./Ingest";
+
+    private String omdbApiKey = "";
 
     private boolean enableCudaAcceleration;
 
@@ -28,6 +31,10 @@ public class Config {
 
     public File getCacheDirectory() {
         return new File(this.cacheDirectory);
+    }
+
+    public File getIngestDirectory() {
+        return new File(this.ingestDirectory);
     }
 
 }
