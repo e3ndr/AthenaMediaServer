@@ -2,10 +2,7 @@
 	import { page } from '$app/stores';
 
 	const SECTIONS = [
-		[
-			{ name: 'Home', icon: 'outline/home', href: '/', useStartsWith: false },
-			{ name: 'Movies', icon: 'outline/film', href: '/media/movies', useStartsWith: true }
-		],
+		[{ name: 'Media', icon: 'outline/film', href: '/', useStartsWith: false }],
 		[
 			{ name: 'Settings', icon: 'outline/cog', href: '/settings', useStartsWith: true },
 			{
