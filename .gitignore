@@ -6,6 +6,7 @@
 
 # Eclipse
 .settings/
+.metadata/
 .project
 .classpath
 
@@ -18,7 +19,7 @@
 
 # Misc
 *Test.java
-config.json
-/Media/
-/Cache/
-/Ingest/
+/server/config.json
+/server/Media/
+/server/Cache/
+/server/Ingest/
