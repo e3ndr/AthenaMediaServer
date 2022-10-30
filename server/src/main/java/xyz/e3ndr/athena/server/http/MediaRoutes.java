@@ -154,11 +154,21 @@ class MediaRoutes implements HttpProvider {
             .setMimeType("text/html");
     }
 
-    @HttpEndpoint(uri = "/api/media/list")
+    @HttpEndpoint(uri = "/api/media")
     public HttpResponse onListMedia(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
             Rson.DEFAULT.toJson(Athena.listMedia())
+        );
+    }
+
+    @HttpEndpoint(uri = "/api/media/:mediaId")
+    public HttpResponse onGetMediaById(SoraHttpSession session) {
+        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
+
+        return HttpResponse.newFixedLengthResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(media)
         );
     }
 

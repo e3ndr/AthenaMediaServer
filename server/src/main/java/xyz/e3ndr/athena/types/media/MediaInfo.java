@@ -26,6 +26,8 @@ public class MediaInfo {
     private @NonNull List<String> genres;
     private @NonNull List<String> studios;
 
+    private @NonNull Ratings ratings;
+
     @Getter
     @NonNull
     @JsonClass(exposeAll = true)
