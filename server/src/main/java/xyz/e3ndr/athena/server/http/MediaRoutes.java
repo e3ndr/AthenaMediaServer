@@ -6,6 +6,7 @@ import java.util.Map;
 import co.casterlabs.rakurai.io.http.HttpResponse;
 import co.casterlabs.rakurai.io.http.HttpResponse.ResponseContent;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
+import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
@@ -21,7 +22,7 @@ import xyz.e3ndr.athena.types.media.Media;
 class MediaRoutes implements HttpProvider {
 
     @SneakyThrows
-    @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/raw")
+    @HttpEndpoint(uri = "/api/media/:mediaId/stream/raw")
     public HttpResponse onStream(SoraHttpSession session) {
         Map<String, String> query = session.getQueryParameters();
 
@@ -119,7 +120,7 @@ class MediaRoutes implements HttpProvider {
         return resp;
     }
 
-    @HttpEndpoint(uri = "/v1/athena/media/:mediaId/stream/html5")
+    @HttpEndpoint(uri = "/api/media/:mediaId/stream/html5")
     public HttpResponse onStreamHtml(SoraHttpSession session) {
         return HttpResponse
             .newFixedLengthResponse(
@@ -151,6 +152,14 @@ class MediaRoutes implements HttpProvider {
                 )
             )
             .setMimeType("text/html");
+    }
+
+    @HttpEndpoint(uri = "/api/media/list")
+    public HttpResponse onListMedia(SoraHttpSession session) {
+        return HttpResponse.newFixedLengthResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(Athena.listMedia())
+        );
     }
 
 }

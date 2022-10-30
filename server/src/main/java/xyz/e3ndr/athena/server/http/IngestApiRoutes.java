@@ -20,7 +20,7 @@ import xyz.e3ndr.athena.types.media.Media;
 
 class IngestApiRoutes implements HttpProvider {
 
-    @HttpEndpoint(uri = "/v1/athena/api/ingest/file/:fileName", allowedMethods = {
+    @HttpEndpoint(uri = "/api/ingest/file/:fileName", allowedMethods = {
             HttpMethod.POST
     })
     public HttpResponse onIngest(SoraHttpSession session) {
@@ -38,7 +38,7 @@ class IngestApiRoutes implements HttpProvider {
         }
     }
 
-    @HttpEndpoint(uri = "/v1/athena/api/ingest/file/:fileName")
+    @HttpEndpoint(uri = "/api/ingest/file/:fileName")
     public HttpResponse onGetIngestableInformation(SoraHttpSession session) {
         String fileName = URLDecoder.decode(session.getUriParameters().get("fileName"), StandardCharsets.UTF_8);
 
@@ -54,7 +54,7 @@ class IngestApiRoutes implements HttpProvider {
         }
     }
 
-    @HttpEndpoint(uri = "/v1/athena/api/ingest/file/:fileName/stream/:streamId")
+    @HttpEndpoint(uri = "/api/ingest/file/:fileName/stream/:streamId")
     public HttpResponse onStreamFromIngestable(SoraHttpSession session) {
         String fileName = URLDecoder.decode(session.getUriParameters().get("fileName"), StandardCharsets.UTF_8);
         int streamId = Integer.parseInt(session.getUriParameters().get("streamId"));
@@ -76,7 +76,7 @@ class IngestApiRoutes implements HttpProvider {
             .setMimeType("video/x-matroska");
     }
 
-    @HttpEndpoint(uri = "/v1/athena/api/ingest/list")
+    @HttpEndpoint(uri = "/api/ingest/list")
     public HttpResponse onListIngestables(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
@@ -84,7 +84,7 @@ class IngestApiRoutes implements HttpProvider {
         );
     }
 
-    @HttpEndpoint(uri = "/v1/athena/api/omdb/apikey")
+    @HttpEndpoint(uri = "/api/omdb/apikey")
     public HttpResponse onList(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,

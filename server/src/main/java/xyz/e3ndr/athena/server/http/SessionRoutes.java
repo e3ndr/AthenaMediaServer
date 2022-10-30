@@ -8,9 +8,9 @@ import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 import xyz.e3ndr.athena.Athena;
 
-class ApiRoutes implements HttpProvider {
+class SessionRoutes implements HttpProvider {
 
-    @HttpEndpoint(uri = "/v1/athena/api/transcodes")
+    @HttpEndpoint(uri = "/api/transcodes")
     public HttpResponse onListTranscodes(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
@@ -18,7 +18,7 @@ class ApiRoutes implements HttpProvider {
         );
     }
 
-    @HttpEndpoint(uri = "/v1/athena/api/sessions")
+    @HttpEndpoint(uri = "/sessions")
     public HttpResponse onListSessions(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
