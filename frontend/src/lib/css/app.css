@@ -12,6 +12,10 @@ icon>svg {
     height: 100%;
 }
 
+icon>svg[fill=none] * {
+    stroke: currentColor !important;
+}
+
 pre {
     display: inline-block;
 }
