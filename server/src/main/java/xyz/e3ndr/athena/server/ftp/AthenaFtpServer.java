@@ -21,6 +21,7 @@ public class AthenaFtpServer implements AthenaServer {
     private static final int MAX_CLIENTS = 100;
     static final List<Integer> openPorts = Collections.synchronizedList(new LinkedList<>());
 
+    @SuppressWarnings("resource")
     @Override
     public void start(Config config) {
         int controlPort = config.getFtpPort();
@@ -40,8 +41,8 @@ public class AthenaFtpServer implements AthenaServer {
                     int dataPort = openPorts.remove(0); // Passive mode port.
 
                     // Create new worker thread for new connection
-                    FtpClient w = new FtpClient(client, dataPort);
-                    w.start();
+                    new FtpClient(client, dataPort)
+                        .start();
                 } catch (IOException e) {
                     FastLogger.logStatic(LogLevel.SEVERE, "Unable to accept new connection:\n%s", e);
                 }
