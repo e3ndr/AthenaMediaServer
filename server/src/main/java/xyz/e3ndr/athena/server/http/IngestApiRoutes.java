@@ -76,7 +76,7 @@ class IngestApiRoutes implements HttpProvider {
             },
             StandardHttpStatus.OK
         )
-            .setMimeType("video/x-matroska");
+            .setMimeType("video/webm");
     }
 
     @HttpEndpoint(uri = "/api/ingest/list")
