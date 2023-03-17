@@ -62,8 +62,7 @@ class FtpClient extends Thread implements Closeable {
     public FtpClient(Socket client, int dataPort) throws IOException {
         this.dataPort = dataPort;
         this.controlSocket = client;
-
-        logger = new FastLogger(String.format("FTP Worker: %s", this.dataPort));
+        this.logger = new FastLogger(String.format("FTP Worker: %s", this.dataPort));
 
         try {
             this.controlIn = new BufferedReader(new InputStreamReader(this.controlSocket.getInputStream()));
