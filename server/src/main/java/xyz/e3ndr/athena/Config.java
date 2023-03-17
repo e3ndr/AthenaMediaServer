@@ -22,8 +22,8 @@ public class Config {
     private boolean enableCudaAcceleration;
 
     // -1 to disable.
-    private int httpPort = 8080;
-    private int ftpPort = 1025;
+    private int httpPort = 8125;
+    private int ftpPort = 8126;
 
     public File getMediaDirectory() {
         return new File(this.mediaDirectory);
