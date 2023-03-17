@@ -1,5 +1,6 @@
 package xyz.e3ndr.athena.server.http;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
@@ -105,6 +106,9 @@ class MediaRoutes implements HttpProvider {
                 public long getLength() {
                     return chunkLength;
                 }
+
+                @Override
+                public void close() throws IOException {} // Already handled in MediaSession#start
             },
             requestedRange ? StandardHttpStatus.PARTIAL_CONTENT : StandardHttpStatus.OK
         )

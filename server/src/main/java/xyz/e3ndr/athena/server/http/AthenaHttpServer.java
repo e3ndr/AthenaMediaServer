@@ -12,7 +12,6 @@ import xyz.e3ndr.athena.Config;
 import xyz.e3ndr.athena.server.AthenaServer;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
-import xyz.e3ndr.reflectionlib.ReflectionLib;
 
 public class AthenaHttpServer implements AthenaServer {
 
@@ -32,8 +31,10 @@ public class AthenaHttpServer implements AthenaServer {
                 .getSora()
                 .register(new AthenaSoraAdapter());
 
-            FastLogger serverLogger = ReflectionLib.getValue(framework.getServer(), "logger");
-            serverLogger.setCurrentLevel(LogLevel.WARNING);
+            framework
+                .getServer()
+                .getLogger()
+                .setCurrentLevel(LogLevel.WARNING);
 
             framework.startHttpServer();
 
@@ -47,10 +48,10 @@ public class AthenaHttpServer implements AthenaServer {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addHttpProvider(this, new MediaRoutes());
-            sora.addHttpProvider(this, new SessionRoutes());
-            sora.addHttpProvider(this, new WiiMCRoutes());
-            sora.addHttpProvider(this, new IngestApiRoutes());
+            sora.addProvider(this, new MediaRoutes());
+            sora.addProvider(this, new SessionRoutes());
+            sora.addProvider(this, new WiiMCRoutes());
+            sora.addProvider(this, new IngestApiRoutes());
         }
 
         @Override

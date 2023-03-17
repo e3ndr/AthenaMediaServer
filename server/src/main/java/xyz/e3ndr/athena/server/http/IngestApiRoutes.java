@@ -70,6 +70,9 @@ class IngestApiRoutes implements HttpProvider {
                 public long getLength() {
                     return -1;
                 }
+
+                @Override
+                public void close() throws IOException {}  // Already handled in Athena.streamIngestable
             },
             StandardHttpStatus.OK
         )

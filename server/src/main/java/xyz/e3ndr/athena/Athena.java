@@ -110,6 +110,8 @@ public class Athena {
     }
 
     public static void streamIngestable(String fileName, int streamId, OutputStream target) {
+        Process proc = null;
+
         try {
             File mediaFile = new File(ingestDirectory, fileName);
 
@@ -137,20 +139,18 @@ public class Athena {
             command.add(ContainerFormat.MKV.ff);
             command.add("pipe:1");
 
-            final Process proc = new ProcessBuilder()
+            proc = new ProcessBuilder()
                 .command(command)
                 .redirectInput(Redirect.PIPE)
                 .redirectError(Redirect.INHERIT)
                 .redirectOutput(Redirect.PIPE)
                 .start();
 
-            try {
-                IOUtil.writeInputStreamToOutputStream(proc.getInputStream(), target, Athena.STREAMING_BUFFER_SIZE);
-            } finally {
-                proc.destroy();
-            }
+            IOUtil.writeInputStreamToOutputStream(proc.getInputStream(), target, Athena.STREAMING_BUFFER_SIZE);
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (proc != null) proc.destroy();
         }
     }
 
