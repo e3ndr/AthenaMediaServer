@@ -10,7 +10,7 @@ import xyz.e3ndr.athena.Athena;
 
 class SessionRoutes implements HttpProvider {
 
-    @HttpEndpoint(uri = "/api/transcodes")
+    @HttpEndpoint(uri = "/api/sessions/transcodes")
     public HttpResponse onListTranscodes(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
@@ -18,7 +18,7 @@ class SessionRoutes implements HttpProvider {
         );
     }
 
-    @HttpEndpoint(uri = "/sessions")
+    @HttpEndpoint(uri = "/api/sessions")
     public HttpResponse onListSessions(SoraHttpSession session) {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
