@@ -13,6 +13,7 @@
 	import '$lib/css/colors/base.css';
 	import '$lib/css/colors/primary.css';
 	import '$lib/css/colors/misc.css';
+	import '$lib/css/theme/_dark.css';
 
 	onMount(iconsHook);
 </script>
