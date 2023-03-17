@@ -18,7 +18,13 @@ function replaceIcon(/** @type {HTMLElement} */ element) {
 
 				switch (iconType) {
 					case 'critic':
-						url = `/images/critics/${iconPath}.svg`;
+						svg = await fetch(`/images/critics/${iconPath}.svg`).then((res) => {
+							if (res.ok) {
+								return res.text();
+							} else {
+								throw 'Status: ' + res.status;
+							}
+						});
 						break;
 
 					case 'icon':
