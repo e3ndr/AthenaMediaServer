@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import co.casterlabs.rakurai.io.http.HttpMethod;
 import co.casterlabs.rakurai.io.http.HttpResponse;
@@ -32,7 +33,9 @@ class IngestApiRoutes implements HttpProvider {
 
             Athena.ingest(fileName, media);
 
-            return HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK);
+            return HttpResponse
+                .newFixedLengthResponse(StandardHttpStatus.OK)
+                .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
         } catch (Exception e) {
             return HttpResponse.newFixedLengthResponse(StandardHttpStatus.INTERNAL_ERROR);
         }
@@ -47,10 +50,12 @@ class IngestApiRoutes implements HttpProvider {
         if (ingestable == null) {
             return HttpResponse.newFixedLengthResponse(StandardHttpStatus.NOT_FOUND);
         } else {
-            return HttpResponse.newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                ingestable
-            );
+            return HttpResponse
+                .newFixedLengthResponse(
+                    StandardHttpStatus.OK,
+                    ingestable
+                )
+                .putHeader("Access-Control-Allow-Origin", session.getHeader("Origin"));
         }
     }
 
@@ -76,23 +81,28 @@ class IngestApiRoutes implements HttpProvider {
             },
             StandardHttpStatus.OK
         )
-            .setMimeType("video/webm");
+            .setMimeType("video/webm")
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
     @HttpEndpoint(uri = "/api/ingest/list")
     public HttpResponse onListIngestables(SoraHttpSession session) {
-        return HttpResponse.newFixedLengthResponse(
-            StandardHttpStatus.OK,
-            Rson.DEFAULT.toJson(Athena.listIngestables())
-        );
+        return HttpResponse
+            .newFixedLengthResponse(
+                StandardHttpStatus.OK,
+                Rson.DEFAULT.toJson(Athena.listIngestables())
+            )
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
     @HttpEndpoint(uri = "/api/omdb/apikey")
     public HttpResponse onList(SoraHttpSession session) {
-        return HttpResponse.newFixedLengthResponse(
-            StandardHttpStatus.OK,
-            JsonObject.singleton("apiKey", Athena.omdbApiKey)
-        );
+        return HttpResponse
+            .newFixedLengthResponse(
+                StandardHttpStatus.OK,
+                JsonObject.singleton("apiKey", Athena.omdbApiKey)
+            )
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
 }

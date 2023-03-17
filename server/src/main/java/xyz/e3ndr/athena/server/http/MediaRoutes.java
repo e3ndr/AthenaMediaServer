@@ -2,6 +2,7 @@ package xyz.e3ndr.athena.server.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Map;
 
 import co.casterlabs.rakurai.io.http.HttpResponse;
@@ -121,7 +122,8 @@ class MediaRoutes implements HttpProvider {
             resp.putHeader("Content-Range", String.format("bytes %d-%d/%d", startAt, endAt, fileLength));
         }
 
-        return resp;
+        return resp
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/html5")
@@ -155,25 +157,30 @@ class MediaRoutes implements HttpProvider {
                     session.getQueryString()
                 )
             )
-            .setMimeType("text/html");
+            .setMimeType("text/html")
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
     @HttpEndpoint(uri = "/api/media")
     public HttpResponse onListMedia(SoraHttpSession session) {
-        return HttpResponse.newFixedLengthResponse(
-            StandardHttpStatus.OK,
-            Rson.DEFAULT.toJson(Athena.listMedia())
-        );
+        return HttpResponse
+            .newFixedLengthResponse(
+                StandardHttpStatus.OK,
+                Rson.DEFAULT.toJson(Athena.listMedia())
+            )
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
     @HttpEndpoint(uri = "/api/media/:mediaId")
     public HttpResponse onGetMediaById(SoraHttpSession session) {
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
-        return HttpResponse.newFixedLengthResponse(
-            StandardHttpStatus.OK,
-            Rson.DEFAULT.toJson(media)
-        );
+        return HttpResponse
+            .newFixedLengthResponse(
+                StandardHttpStatus.OK,
+                Rson.DEFAULT.toJson(media)
+            )
+            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
 }
