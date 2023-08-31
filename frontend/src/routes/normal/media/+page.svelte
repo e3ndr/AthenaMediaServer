@@ -12,7 +12,7 @@
 	{#each data.mediaList as media}
 		<a
 			class="m-2 flex flex-col w-36"
-			href="/media/{media.id}"
+			href="/normal/media/{media.id}"
 			title="{media.info.title} ({media.info.year})"
 		>
 			<div class="shadow-md">
