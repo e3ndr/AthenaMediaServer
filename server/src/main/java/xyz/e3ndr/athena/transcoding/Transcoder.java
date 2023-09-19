@@ -47,13 +47,7 @@ public class Transcoder {
             command.add(desiredACodec.ff);
 
             /* ---- Video ---- */
-            command.add("-c:v");
-            command.add(desiredVCodec.getFF(Athena.enableCudaAcceleration));
-
-            if (!Athena.enableCudaAcceleration) {
-                command.add("-tune");
-                command.add("zerolatency");
-            }
+            command.addAll(desiredVCodec.getFF(Athena.enableCudaAcceleration));
 
             if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
                 command.add("-maxrate");

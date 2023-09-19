@@ -1,28 +1,44 @@
 package xyz.e3ndr.athena.types;
 
-import lombok.AllArgsConstructor;
+import java.util.Arrays;
+import java.util.List;
 
-@AllArgsConstructor
 public enum VideoCodec {
-    // @formatter:off
-    H264  ("h264",      "h264_nvenc"),
-    HEVC  ("hevc",      "hevc_nvenc"),
-    SPARK ("flv1",      null),
-    THEORA("libtheora", null),
-    VP8   ("vp8",       null),
-    // @formatter:on
-
+    H264,
+    HEVC,
+    SPARK,
+    THEORA,
+    VP8,
     ;
 
-    private final String cpu;
-    private final String cuda;
+    public List<String> getFF(boolean enableCuda) {
+        switch (this) {
+            case H264:
+                if (enableCuda) {
+                    return Arrays.asList("-c:v", "h264_nvenc", "-profile:v", "main", "-level:v", "1.0");
+                } else {
+                    return Arrays.asList("-c:v", "h264", "-profile:v", "main", "-level:v", "1.0");
+                }
 
-    public String getFF(boolean enableCuda) {
-        if ((this.cuda != null) && enableCuda) {
-            return this.cuda;
+            case HEVC:
+                if (enableCuda) {
+                    return Arrays.asList("-c:v", "hevc_nvenc");
+                } else {
+                    return Arrays.asList("-c:v", "hevc");
+                }
+
+            case SPARK:
+                return Arrays.asList("-c:v", "flv1");
+
+            case THEORA:
+                return Arrays.asList("-c:v", "libtheora");
+
+            case VP8:
+                return Arrays.asList("-c:v", "vp8");
+
+            default:
+                return null; // Shut up compiler.
         }
-
-        return this.cpu;
     }
 
 }
