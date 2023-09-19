@@ -46,7 +46,7 @@ class WiiMCRoutes implements HttpProvider {
         int idx = 1;
         for (Media media : mediaList) {
             String url = String.format(
-                "http://%s/api/media/%s/stream/raw?quality=SD&format=MKV",
+                "http://%s/api/media/%s/stream/raw?quality=SD&format=MKV&videoCodec=H264&audioCodec=AAC",
                 host, media.getId()
             );
 
