@@ -41,6 +41,7 @@ public class TranscodeSession {
     private @Setter boolean isComplete;
 
     @JsonExclude
+    @ToString.Exclude
     @Getter(AccessLevel.NONE)
     public final FastLogger logger = new FastLogger("Transcode Session: ".concat(this.id));
 
