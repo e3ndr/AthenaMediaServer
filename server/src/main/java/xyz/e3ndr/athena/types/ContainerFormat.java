@@ -15,6 +15,7 @@ public enum ContainerFormat {
     OGG  ("ogg",      Collections.emptyList()),
     WEBM ("webm",     Collections.emptyList()),
     MKV  ("matroska", Collections.emptyList()),
+    TS   ("mpegts",   Collections.emptyList()),
     // @formatter:on
 
     // Needs more testing but a lot of browsers accidentally support Matroska since
