@@ -78,33 +78,33 @@
 		<dependency>
 			<groupId>co.casterlabs.Sora</groupId>
 			<artifactId>Sora-Framework</artifactId>
-			<version>2.11.0</version>
+			<version>2.12.4</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>co.casterlabs.Rakurai</groupId>
-			<artifactId>Http-Server</artifactId>
-			<version>1.17.0</version>
+			<artifactId>ImplRakurai</artifactId>
+			<version>1.17.8</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.casterlabs.Rakurai</groupId>
 			<artifactId>Json</artifactId>
-			<version>1.17.0</version>
+			<version>1.17.8</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>co.casterlabs.Rakurai</groupId>
 			<artifactId>Util</artifactId>
-			<version>1.17.0</version>
+			<version>1.17.8</version>
 			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.github.e3ndr</groupId>
 			<artifactId>FastLoggingFramework</artifactId>
-			<version>1.10.0</version>
+			<version>1.11.0</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>

@@ -7,9 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import co.casterlabs.rakurai.io.http.HttpMethod;
-import co.casterlabs.rakurai.io.http.HttpResponse;
-import co.casterlabs.rakurai.io.http.HttpResponse.ResponseContent;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
+import co.casterlabs.rakurai.io.http.server.HttpResponse;
+import co.casterlabs.rakurai.io.http.server.HttpResponse.ResponseContent;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonObject;
@@ -55,6 +55,7 @@ class IngestApiRoutes implements HttpProvider {
                     StandardHttpStatus.OK,
                     ingestable
                 )
+                .setMimeType("application/json")
                 .putHeader("Access-Control-Allow-Origin", session.getHeader("Origin"));
         }
     }
@@ -92,6 +93,7 @@ class IngestApiRoutes implements HttpProvider {
                 StandardHttpStatus.OK,
                 Rson.DEFAULT.toJson(Athena.listIngestables())
             )
+            .setMimeType("application/json")
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
@@ -102,6 +104,7 @@ class IngestApiRoutes implements HttpProvider {
                 StandardHttpStatus.OK,
                 JsonObject.singleton("apiKey", Athena.omdbApiKey)
             )
+            .setMimeType("application/json")
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 

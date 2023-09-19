@@ -2,8 +2,8 @@ package xyz.e3ndr.athena.server.http;
 
 import java.util.List;
 
-import co.casterlabs.rakurai.io.http.HttpResponse;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
+import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
@@ -21,7 +21,8 @@ class WiiMCRoutes implements HttpProvider {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
             playlistResponse
-        );
+        )
+            .setMimeType("text/plain");
     }
 
     @HttpEndpoint(uri = "/api/wiimc/search")
@@ -34,7 +35,8 @@ class WiiMCRoutes implements HttpProvider {
         return HttpResponse.newFixedLengthResponse(
             StandardHttpStatus.OK,
             playlistResponse
-        );
+        )
+            .setMimeType("text/plain");
     }
 
     private static String generatePlaylistForMedia(String host, List<Media> mediaList) {

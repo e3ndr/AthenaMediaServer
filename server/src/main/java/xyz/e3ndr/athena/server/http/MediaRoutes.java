@@ -5,9 +5,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Map;
 
-import co.casterlabs.rakurai.io.http.HttpResponse;
-import co.casterlabs.rakurai.io.http.HttpResponse.ResponseContent;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
+import co.casterlabs.rakurai.io.http.server.HttpResponse;
+import co.casterlabs.rakurai.io.http.server.HttpResponse.ResponseContent;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
@@ -168,6 +168,7 @@ class MediaRoutes implements HttpProvider {
                 StandardHttpStatus.OK,
                 Rson.DEFAULT.toJson(Athena.listMedia())
             )
+            .setMimeType("application/json")
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
@@ -180,6 +181,7 @@ class MediaRoutes implements HttpProvider {
                 StandardHttpStatus.OK,
                 Rson.DEFAULT.toJson(media)
             )
+            .setMimeType("application/json")
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 

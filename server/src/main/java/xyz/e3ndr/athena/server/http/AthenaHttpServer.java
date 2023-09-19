@@ -2,7 +2,6 @@ package xyz.e3ndr.athena.server.http;
 
 import org.jetbrains.annotations.Nullable;
 
-import co.casterlabs.rakurai.io.http.server.HttpServerImplementation;
 import co.casterlabs.sora.Sora;
 import co.casterlabs.sora.SoraFramework;
 import co.casterlabs.sora.SoraLauncher;
@@ -24,7 +23,6 @@ public class AthenaHttpServer implements AthenaServer {
 
             SoraFramework framework = new SoraLauncher()
                 .setPort(port)
-                .setImplementation(HttpServerImplementation.UNDERTOW)
                 .buildWithoutPluginLoader();
 
             framework

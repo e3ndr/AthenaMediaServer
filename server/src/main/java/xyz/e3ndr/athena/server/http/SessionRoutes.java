@@ -2,8 +2,8 @@ package xyz.e3ndr.athena.server.http;
 
 import java.util.Arrays;
 
-import co.casterlabs.rakurai.io.http.HttpResponse;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
+import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
