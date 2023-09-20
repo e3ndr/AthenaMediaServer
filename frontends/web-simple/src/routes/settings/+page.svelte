@@ -57,6 +57,26 @@
 	</script>
 </svelte:head>
 
+<a href="/">Go Back</a>
+
+<h1 style="margin: 0;">Servers:</h1>
+{#each data.settings.servers as server, idx}
+	<form method="POST" action="/settings/save/delete" style="margin-bottom: 4px;">
+		<input name="arr-idx" type="hidden" value={idx} />
+		<input type="input" value={server} disabled />
+		<input type="submit" value="Delete" style="width: 8ch;" />
+	</form>
+{/each}
+<form method="POST" action="/settings/save/add">
+	<input name="server" type="input" placeholder="https://example.com:8125" />
+	<input type="submit" value="Add" style="width: 8ch;" />
+</form>
+
+<br />
+<br />
+<br />
+
+<h1 style="margin: 0;">Settings:</h1>
 <form id="settings-form" method="POST" action="/settings/save">
 	<table>
 		<colgroup>

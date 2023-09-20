@@ -45,6 +45,8 @@ public class Transcoder {
             /* ---- Audio ---- */
             command.add("-c:a");
             command.add(desiredACodec.ff);
+            command.add("-ar");
+            command.add("44100");
 
             /* ---- Video ---- */
             command.addAll(desiredVCodec.getFF(Athena.enableCudaAcceleration));
@@ -93,7 +95,7 @@ public class Transcoder {
 
                 String line = null;
                 while ((line = stdout.nextLine()) != null) {
-                    session.logger.trace(line);
+                    session.logger.debug(line);
 
                     if (line.startsWith("frame=")) {
                         if (!hasStarted) {

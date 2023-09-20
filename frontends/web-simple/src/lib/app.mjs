@@ -1,14 +1,42 @@
+import { DEFAULT_SERVERS_CSV } from '$env/static/private';
+
+export const SAVE_HTML = `<!DOCTYPE html>
+<html>
+    <script>
+        alert("Successfully saved your settings! " + document.cookie);
+        location.href = "/settings";
+    </script>
+    <a href="/settings">Click here if not automatically redirected</a>
+</html>
+`;
+
 export function setSettings(newSettings, cookies) {
-    cookies.delete("settings", { path: "/" });
-    cookies.set("settings", JSON.stringify(newSettings), { path: "/" });
+    // cookies.delete("settings", { path: "/" });
+    cookies.set(
+        "settings",
+        JSON.stringify(newSettings),
+        {
+            path: "/",
+            httpOnly: false,
+            secure: true,
+            sameSite: false,
+            expires: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))
+        }
+    );
 }
 
 export function getSettings(cookies, headers) {
     const settings = JSON.parse(cookies.get("settings") || "{}");
 
+    let defaultServers = [];
+
+    if (DEFAULT_SERVERS_CSV.length > 0) {
+        defaultServers = DEFAULT_SERVERS_CSV.split(",");
+    }
+
     return {
         // Defaults...
-        servers: [],
+        servers: defaultServers,
         ...getDefaultSettings(headers),
 
         // Add...
@@ -33,9 +61,18 @@ export function getAvailableSettings(headers) {
     // Try and sniff out some defaults from the headers.
     const userAgent = headers.get("User-Agent") || "";
 
+    if (userAgent.includes("PlayStation Portable")) {
+        return {
+            qualities: ["LD"],
+            containers: ["SWF"],
+            videoCodecs: ["SPARK"],
+            audioCodecs: ["MP3"],
+        };
+    }
+
     if (userAgent.includes("Nintendo WiiU")) {
         return {
-            qualities: ["FHD", "HD", "SD", "LD"],
+            qualities: ["HD"],
             containers: ["TS"],
             videoCodecs: ["H264"],
             audioCodecs: ["AAC"],

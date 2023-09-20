@@ -1,11 +1,41 @@
-<h1>Welcome to Athena!</h1>
-<p>
-	Athena is your own personal media server, with transcoding and support for older devices, such as
-	the WiiU. Allowing you to repurpose these devices and give them a new lease on live as a media
-	center.
-</p>
+<script>
+	import PageTitle from '$lib/PageTitle.svelte';
+	export let data;
+</script>
 
-<h2>To get started...</h2>
-<p>You will need the IP address of your Athena instance.</p>
+<svelte:head>
+	{#each data.errors as error}
+		<button
+			class="error-alert"
+			onclick="alert('An error occurred whilst loading library:\n\n' + {JSON.stringify(error)});"
+			style="display: none;"
+		/>
+	{/each}
+	<script>
+		var errorAlerts = document.getElementsByClassName('error-alert');
+		for (var i = 0; i < errorAlerts.length; i++) {
+			errorAlerts[i].click();
+		}
+	</script>
+</svelte:head>
 
-<a href="/settings"> Click here to go to your settings and configure this client </a>
+<PageTitle title={['Media']} />
+
+<div>
+	{#each data.mediaList as media}
+		<a
+			style="margin: 10px; display: inline-block;"
+			href="/media/{media.id}"
+			title="{media.info.title} ({media.info.year})"
+		>
+			<img
+				style="width: 200px; height: 320px; border-radius: 20px; object-fit: cover;"
+				src={media.files.images.posterUrl}
+				alt="{media.info.title} Poster"
+			/>
+			<h1 style="font-size: small; font-weight: 500;">
+				{media.info.title}
+			</h1>
+		</a>
+	{/each}
+</div>

@@ -5,24 +5,7 @@ export async function POST({ cookies, request }) {
     const currentSettings = getSettings(cookies, request.headers);
 
     let newSettings = { ...currentSettings };
-
-    // TODO validate with getAvailableSettings().
-
-    if (postData["media-quality"]) {
-        newSettings.preferredQuality = postData['media-quality'];
-    }
-
-    if (postData["container-format"]) {
-        newSettings.deliveryPreferences.c = postData['container-format'];
-    }
-
-    if (postData["video-codec"]) {
-        newSettings.deliveryPreferences.v = postData['video-codec'];
-    }
-
-    if (postData["audio-codec"]) {
-        newSettings.deliveryPreferences.a = postData['audio-codec'];
-    }
+    newSettings.servers.splice(postData["arr-idx"], 1);
 
     setSettings(newSettings, cookies);
 

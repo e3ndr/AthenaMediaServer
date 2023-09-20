@@ -1,11 +1,14 @@
 import { error, redirect } from '@sveltejs/kit';
 
+import { getSettings } from "$lib/app.mjs";
 import * as API from '$lib/api.mjs';
 
 /** @type {import('./$types').PageLoad} */
-export async function load({ params }) {
+export async function load({ cookies, request, params }) {
 	try {
-		const media = await API.getMediaById({ mediaId: params.mediaId });
+		const settings = getSettings(cookies, request.headers);
+
+		const media = await API.getMediaById(settings.servers[0], { mediaId: params.mediaId });
 		if (!media) throw redirect(302, '/media');
 
 		return {
