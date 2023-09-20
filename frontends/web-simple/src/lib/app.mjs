@@ -74,7 +74,7 @@ export function getAvailableSettings(headers) {
         return {
             qualities: ["HD"],
             containers: ["TS"],
-            videoCodecs: ["H264"],
+            videoCodecs: ["H264_BASELINE"],
             audioCodecs: ["AAC"],
         };
     }
@@ -83,7 +83,7 @@ export function getAvailableSettings(headers) {
         return {
             qualities: ["SD"],
             containers: ["FLV"],
-            videoCodecs: ["H264"],
+            videoCodecs: ["H264_BASELINE"],
             audioCodecs: ["AAC"],
         };
     }
@@ -92,7 +92,7 @@ export function getAvailableSettings(headers) {
         return {
             qualities: ["FHD", "HD", "SD", "LD"],
             containers: ["MP4"],
-            videoCodecs: ["H264"],
+            videoCodecs: ["H264_BASELINE"],
             audioCodecs: ["AAC"],
         };
     }
@@ -100,7 +100,7 @@ export function getAvailableSettings(headers) {
     return {
         qualities: ["SOURCE", "UHD", "FHD", "HD", "SD", "LD"],
         containers: ["MKV", "MP4"],
-        videoCodecs: ["H264", "HEVC", "THEORA", "VP8"],
-        audioCodecs: ["AAC", "MP3", "OPUS"],
+        videoCodecs: ["AV1", "HEVC", "H264_MAIN"],
+        audioCodecs: ["OPUS", "AAC", "MP3"],
     };
 }

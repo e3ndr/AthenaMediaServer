@@ -37,23 +37,24 @@ public class Transcoder {
             command.add(media.getStreamFile(streamId).getCanonicalPath());
         }
 
-        if (desiredQuality == VideoQuality.SOURCE) {
-            // Just copy the codecs.
-            command.add("-c");
-            command.add("copy");
+        /* ---- Audio ---- */
+        command.addAll(FFMpegArgs.a_getFF(desiredACodec));
+
+        if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
+            command.add("-ar");
+            command.add("44100");
         } else {
-            /* ---- Audio ---- */
-            command.add("-c:a");
-            command.add(desiredACodec.ff);
+            command.add("-ar");
+            command.add("48000");
+        }
 
-            /* ---- Video ---- */
-            command.addAll(desiredVCodec.getFF(Athena.enableCudaAcceleration));
+        /* ---- Video ---- */
+        command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.enableCudaAcceleration));
 
+        if (desiredQuality != VideoQuality.SOURCE) {
             if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
                 command.add("-maxrate");
                 command.add(String.format("%dK", desiredQuality.bitrate));
-                command.add("-ar");
-                command.add("44100");
             } else {
                 command.add("-b:v");
                 command.add(String.format("%dK", desiredQuality.bitrate));

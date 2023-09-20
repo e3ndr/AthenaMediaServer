@@ -31,10 +31,10 @@ class MediaRoutes implements HttpProvider {
         // Parameters.
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
-        VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", "SOURCE").toUpperCase());
-        VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", "H264").toUpperCase());
-        AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", "SOURCE").toUpperCase());
-        ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", "MKV").toUpperCase());
+        VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.SOURCE.name()).toUpperCase());
+        VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.H264_BASELINE.name()).toUpperCase());
+        AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
+        ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());
         String forceMime = query.get("forceMime");
 
         // Parse out the streamIds.
