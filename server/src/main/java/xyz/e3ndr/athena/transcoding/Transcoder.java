@@ -45,8 +45,6 @@ public class Transcoder {
             /* ---- Audio ---- */
             command.add("-c:a");
             command.add(desiredACodec.ff);
-            command.add("-ar");
-            command.add("44100");
 
             /* ---- Video ---- */
             command.addAll(desiredVCodec.getFF(Athena.enableCudaAcceleration));
@@ -54,6 +52,8 @@ public class Transcoder {
             if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
                 command.add("-maxrate");
                 command.add(String.format("%dK", desiredQuality.bitrate));
+                command.add("-ar");
+                command.add("44100");
             } else {
                 command.add("-b:v");
                 command.add(String.format("%dK", desiredQuality.bitrate));
