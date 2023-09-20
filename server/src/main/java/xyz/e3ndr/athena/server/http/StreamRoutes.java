@@ -125,44 +125,23 @@ class StreamRoutes implements HttpProvider {
     @SneakyThrows
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/hls")
     public HttpResponse onStreamHLS(SoraHttpSession session) {
-        Map<String, String> query = session.getQueryParameters();
+        final double DURATION = 8;
 
-        // Parameters.
-        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
-
-        VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.SOURCE.name()).toUpperCase());
-        VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.H264_BASELINE.name()).toUpperCase());
-        AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
-        ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());
-
-        // Parse out the streamIds.
-        int[] streamIds = null;
-
-        if (query.containsKey("streams")) {
-            String[] split = query.get("streams").split(",");
-            streamIds = new int[split.length];
-
-            for (int idx = 0; idx < split.length; idx++) {
-                streamIds[idx] = Integer.parseInt(split[idx].trim());
-            }
-        } else {
-            streamIds = media.getFiles().getStreams().getDefaultStreams();
-        }
-
-        final int DURATION = 8;
         String playlist = "#EXTM3U\r\n"
             + "#EXT-X-PLAYLIST-TYPE:VOD\r\n"
             + "#EXT-X-TARGETDURATION:" + DURATION + "\r\n"
             + "#EXT-X-VERSION:4\r\n"
             + "#EXT-X-MEDIA-SEQUENCE:0\r\n";
 
+        String mediaId = session.getUriParameters().get("mediaId");
+
         // TODO
-//        + "#EXTINF:" + DURATION + ".0,\r\n"
-//        + "http://example.com/movie1/fileSequenceD.ts\r\n"
+        playlist += String.format("#EXTINF:%.1f,\r\n/api/media/%s/stream/raw%s&skipTo=%d\r\n", DURATION, mediaId, session.getQueryString(), -1);
 
-        playlist += "\r\n#EXT-X-ENDLIST";
+        playlist += "#EXT-X-ENDLIST";
 
-        return null; // TODO create the playlist.
+        return HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, playlist)
+            .setMimeType("application/vnd.apple.mpegurl");
     }
 
 }

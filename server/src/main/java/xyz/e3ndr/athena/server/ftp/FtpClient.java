@@ -629,7 +629,7 @@ class FtpClient extends Thread implements Closeable {
                     streamIds
                 );
 
-                session.start(skip, Long.MAX_VALUE, target);
+                session.start(skip, Long.MAX_VALUE, 0, target);
 
                 this.sendMessage(226, "File transfer successful, closing data connection");
             } catch (IOException e) {
