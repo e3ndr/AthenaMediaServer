@@ -61,7 +61,7 @@ public class Transcoder {
 
             // https://trac.ffmpeg.org/wiki/Scaling
             command.add("-vf");
-            command.add(String.format("scale='min(%d,iw)':-1", desiredQuality.max));
+            command.add(String.format("scale='min(%d,iw)':-1, pad=ceil(iw/2)*2:ceil(ih/2)*2", desiredQuality.max));
         }
 
         /* ---- Format & Output ---- */
