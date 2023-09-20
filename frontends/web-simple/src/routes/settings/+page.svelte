@@ -63,14 +63,16 @@
 {#each data.settings.servers as server, idx}
 	<form method="POST" action="/settings/save/delete" style="margin-bottom: 4px;">
 		<input name="arr-idx" type="hidden" value={idx} />
-		<input type="input" value={server} disabled />
+		<input type="input" value={server} disabled style="width: 42ch;" />
 		<input type="submit" value="Delete" style="width: 8ch;" />
 	</form>
 {/each}
-<form method="POST" action="/settings/save/add">
-	<input name="server" type="input" placeholder="https://example.com:8125" />
-	<input type="submit" value="Add" style="width: 8ch;" />
-</form>
+{#if data.settings.servers.length < 3}
+	<form method="POST" action="/settings/save/add">
+		<input name="server" type="input" placeholder="https://example.com:8125" style="width: 42ch;" />
+		<input type="submit" value="Add" style="width: 8ch;" />
+	</form>
+{/if}
 
 <br />
 <br />

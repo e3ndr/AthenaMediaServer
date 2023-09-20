@@ -3,7 +3,7 @@ import { DEFAULT_SERVERS_CSV } from '$env/static/private';
 export const SAVE_HTML = `<!DOCTYPE html>
 <html>
     <script>
-        alert("Successfully saved your settings! " + document.cookie);
+        alert("Successfully saved your settings!");
         location.href = "/settings";
     </script>
     <a href="/settings">Click here if not automatically redirected</a>
@@ -90,8 +90,8 @@ export function getAvailableSettings(headers) {
 
     return {
         qualities: ["SOURCE", "UHD", "FHD", "HD", "SD", "LD"],
-        containers: ["MKV", "MP4", "TS"],
-        videoCodecs: ["H264", "HEVC", "SPARK", "THEORA", "VP8"],
+        containers: ["MKV", "MP4"],
+        videoCodecs: ["H264", "HEVC", "THEORA", "VP8"],
         audioCodecs: ["AAC", "MP3", "OPUS"],
     };
 }

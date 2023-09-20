@@ -21,6 +21,8 @@
 
 <PageTitle title={['Media']} />
 
+<a href="/settings" style="position: absolute; right: 6px; top: 4px;">Settings</a>
+
 <div>
 	{#each data.mediaList as media}
 		<a
