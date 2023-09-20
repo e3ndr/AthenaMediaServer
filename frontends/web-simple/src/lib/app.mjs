@@ -79,6 +79,15 @@ export function getAvailableSettings(headers) {
         };
     }
 
+    if (userAgent.includes("Nintendo Wii")) {
+        return {
+            qualities: ["SD"],
+            containers: ["FLV"],
+            videoCodecs: ["H264"],
+            audioCodecs: ["AAC"],
+        };
+    }
+
     return {
         qualities: ["SOURCE", "UHD", "FHD", "HD", "SD", "LD"],
         containers: ["MKV", "MP4", "TS"],
