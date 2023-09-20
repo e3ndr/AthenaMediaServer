@@ -9,13 +9,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum ContainerFormat {
     // @formatter:off
-    MP4  ("mp4",      Arrays.asList("-movflags", "faststart+frag_keyframe")),
-    SWF  ("swf",      Collections.emptyList()),
-    FLV  ("flv",      Collections.emptyList()),
-    OGG  ("ogg",      Collections.emptyList()),
-    WEBM ("webm",     Collections.emptyList()),
-    MKV  ("matroska", Collections.emptyList()),
-    TS   ("mpegts",   Collections.emptyList()),
+    MKV  ("matroska", true,  Collections.emptyList()),
+    MP4  ("mp4",      false, Arrays.asList("-movflags", "faststart+frag_keyframe")),
+    TS   ("mpegts",   false, Collections.emptyList()),
     // @formatter:on
 
     // Needs more testing but a lot of browsers accidentally support Matroska since
@@ -28,6 +24,7 @@ public enum ContainerFormat {
     ;
 
     public final String ff;
+    public final boolean streamable;
     public final List<String> flags;
 
 }

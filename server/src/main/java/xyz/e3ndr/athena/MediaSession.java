@@ -60,8 +60,11 @@ public class MediaSession {
         this.streamIds = streamIds;
     }
 
-    public void start(long skip, long maxLength, OutputStream target) {
+    public void start(long skip, long maxLength, long skipTo, OutputStream target) {
         Athena.mediaSessions.add(this);
+
+        // TODO recreate the container on the fly and allow for timestamp skipping
+        // (skipTo).
 
         try (
             FileChannel fileChannel = FileChannel.open(this.file.toPath(), EnumSet.of(StandardOpenOption.READ));

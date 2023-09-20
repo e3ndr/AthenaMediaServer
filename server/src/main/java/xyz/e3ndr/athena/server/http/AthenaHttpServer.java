@@ -47,6 +47,7 @@ public class AthenaHttpServer implements AthenaServer {
         @Override
         public void onInit(Sora sora) {
             sora.addProvider(this, new MediaRoutes());
+            sora.addProvider(this, new StreamRoutes());
             sora.addProvider(this, new SessionRoutes());
             sora.addProvider(this, new WiiMCRoutes());
             sora.addProvider(this, new IngestApiRoutes());

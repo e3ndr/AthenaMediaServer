@@ -40,10 +40,7 @@ public class Transcoder {
         /* ---- Audio ---- */
         command.addAll(FFMpegArgs.a_getFF(desiredACodec));
 
-        if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
-            command.add("-ar");
-            command.add("44100");
-        } else {
+        if (desiredACodec != AudioCodec.SOURCE) {
             command.add("-ar");
             command.add("48000");
         }
@@ -52,13 +49,8 @@ public class Transcoder {
         command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.enableCudaAcceleration));
 
         if (desiredQuality != VideoQuality.SOURCE) {
-            if (desiredContainer == ContainerFormat.FLV || desiredContainer == ContainerFormat.SWF) {
-                command.add("-maxrate");
-                command.add(String.format("%dK", desiredQuality.bitrate));
-            } else {
-                command.add("-b:v");
-                command.add(String.format("%dK", desiredQuality.bitrate));
-            }
+            command.add("-b:v");
+            command.add(String.format("%dK", desiredQuality.bitrate));
 
             // https://trac.ffmpeg.org/wiki/Scaling
             command.add("-vf");
@@ -96,7 +88,7 @@ public class Transcoder {
 
                 String line = null;
                 while ((line = stdout.nextLine()) != null) {
-                    session.logger.debug(line);
+                    session.logger.trace(line);
 
                     if (line.startsWith("frame=")) {
                         if (!hasStarted) {
