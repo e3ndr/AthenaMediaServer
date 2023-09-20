@@ -88,6 +88,15 @@ export function getAvailableSettings(headers) {
         };
     }
 
+    if (userAgent.includes("Windows Phone 10")) {
+        return {
+            qualities: ["FHD", "HD", "SD", "LD"],
+            containers: ["MP4"],
+            videoCodecs: ["H264"],
+            audioCodecs: ["AAC"],
+        };
+    }
+
     return {
         qualities: ["SOURCE", "UHD", "FHD", "HD", "SD", "LD"],
         containers: ["MKV", "MP4"],
