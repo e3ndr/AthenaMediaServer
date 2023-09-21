@@ -23,36 +23,35 @@ public class MediaInfo {
 
     private @NonNull List<Director> directors;
     private @NonNull List<Actor> actors;
-    private @NonNull List<String> studios;
+    private @NonNull List<Studio> studios;
 
     private @NonNull Ratings ratings;
 
     @Getter
-    @NonNull
     @JsonClass(exposeAll = true)
     public static class Director {
-        private String id;
-        private String name;
-        private String imageUrl;
+        private @NonNull String id;
+        private @NonNull String name;
+        private @Nullable String imageUrl;
     }
 
     @Getter
-    @NonNull
+
     @JsonClass(exposeAll = true)
     public static class Actor {
-        private String id;
-        private String name;
-        private String playedCharacter;
-        private String imageUrl;
+        private @NonNull String id;
+        private @NonNull String name;
+        private @NonNull String playedCharacter;
+        private @Nullable String imageUrl;
     }
 
     @Getter
     @NonNull
     @JsonClass(exposeAll = true)
     public static class Studio {
-        private String id;
-        private String name;
-        private String logoUrl;
+        private @NonNull String id;
+        private @NonNull String name;
+        private @Nullable String logoUrl;
     }
 
     @Getter

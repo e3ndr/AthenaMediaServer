@@ -27,6 +27,8 @@ import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams.Stream;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Athena {
     public static final String STREAM_FORMAT = "mkv";
@@ -202,7 +204,8 @@ public class Athena {
             String mediaIndex = Files.readString(mediaIndexFile.toPath(), StandardCharsets.UTF_8);
 
             return Rson.DEFAULT.fromJson(mediaIndex, Media.class);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            FastLogger.logStatic(LogLevel.DEBUG, e);
             return null;
         }
     }
