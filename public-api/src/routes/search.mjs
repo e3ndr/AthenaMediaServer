@@ -15,7 +15,7 @@ export default (/** @type {import("itty-router").RouterType<import("itty-router"
 
         for (const { id: movieId } of searchResult.results) {
             results.push(
-                await fetch(`https://api.themoviedb.org/3/movie/${encodeURI(movieId)}?append_to_response=image&api_key=${encodeURIComponent(env.TMDB_API_KEY)}`)
+                await fetch(`https://api.themoviedb.org/3/movie/${encodeURI(movieId)}?append_to_response=image,credits&api_key=${encodeURIComponent(env.TMDB_API_KEY)}`)
                     .then((response) => response.json())
                     .then((movieData) => {
                         const [releaseYear, releaseMonth, releaseDay] = movieData.release_date.split("-");
