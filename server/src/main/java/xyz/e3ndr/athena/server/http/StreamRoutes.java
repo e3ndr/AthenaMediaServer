@@ -126,14 +126,13 @@ class StreamRoutes implements HttpProvider {
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/hls")
     public HttpResponse onStreamHLS(SoraHttpSession session) {
         final double DURATION = 8;
+        String mediaId = session.getUriParameters().get("mediaId");
 
         String playlist = "#EXTM3U\r\n"
             + "#EXT-X-PLAYLIST-TYPE:VOD\r\n"
             + "#EXT-X-TARGETDURATION:" + DURATION + "\r\n"
             + "#EXT-X-VERSION:4\r\n"
             + "#EXT-X-MEDIA-SEQUENCE:0\r\n";
-
-        String mediaId = session.getUriParameters().get("mediaId");
 
         // TODO
         playlist += String.format("#EXTINF:%.1f,\r\n/api/media/%s/stream/raw%s&skipTo=%d\r\n", DURATION, mediaId, session.getQueryString(), -1);

@@ -1,6 +1,7 @@
 package xyz.e3ndr.athena.server.http;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
 import co.casterlabs.rakurai.io.http.server.HttpResponse;
@@ -15,12 +16,11 @@ class MediaRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/api/media")
     public HttpResponse onListMedia(SoraHttpSession session) {
-        return HttpResponse
-            .newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                Rson.DEFAULT.toJson(Athena.listMedia())
-            )
-            .setMimeType("application/json")
+        return new JsonResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(Athena.listMedia()),
+            Map.of("media", "GET /api/media/:mediaId")
+        )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
@@ -28,12 +28,14 @@ class MediaRoutes implements HttpProvider {
     public HttpResponse onGetMediaById(SoraHttpSession session) {
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
-        return HttpResponse
-            .newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                Rson.DEFAULT.toJson(media)
+        return new JsonResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(media),
+            Map.of(
+                "stream_raw", "GET /api/media/:mediaId/stream/raw?quality&videoCodec&audioCodec&format&skipTo",
+                "stream_hls", "GET /api/media/:mediaId/stream/hls?quality&videoCodec&audioCodec&format&skipTo"
             )
-            .setMimeType("application/json")
+        )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 

@@ -1,6 +1,7 @@
 package xyz.e3ndr.athena.server.http;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
 import co.casterlabs.rakurai.io.http.server.HttpResponse;
@@ -14,21 +15,21 @@ class SessionRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/api/sessions/transcodes")
     public HttpResponse onListTranscodes(SoraHttpSession session) {
-        return HttpResponse
-            .newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                Rson.DEFAULT.toJson(Athena.transcodeSessions)
-            )
+        return new JsonResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(Athena.transcodeSessions),
+            Map.of("playbacks", "GET /api/sessions/playbacks")
+        )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
-    @HttpEndpoint(uri = "/api/sessions")
-    public HttpResponse onListSessions(SoraHttpSession session) {
-        return HttpResponse
-            .newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                Rson.DEFAULT.toJson(Athena.mediaSessions)
-            )
+    @HttpEndpoint(uri = "/api/sessions/playbacks")
+    public HttpResponse onListPlaybacks(SoraHttpSession session) {
+        return new JsonResponse(
+            StandardHttpStatus.OK,
+            Rson.DEFAULT.toJson(Athena.mediaSessions),
+            Map.of("transcodes", "GET /api/sessions/transcodes")
+        )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
