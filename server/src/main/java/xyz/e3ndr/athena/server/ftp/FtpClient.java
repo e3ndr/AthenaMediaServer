@@ -655,7 +655,7 @@ class FtpClient extends Thread implements Closeable {
 
         List<String> files = new LinkedList<>();
 
-        for (Media media : Athena.listMedia()) {
+        for (Media media : Athena.listMedia(0, Integer.MAX_VALUE)) {
             files.add(
                 String.format(
                     "%s.%s",
@@ -687,7 +687,7 @@ class FtpClient extends Thread implements Closeable {
 
         List<String> files = new LinkedList<>();
 
-        for (Media media : Athena.listMedia()) {
+        for (Media media : Athena.listMedia(0, Integer.MAX_VALUE)) {
             int day = media.getInfo().getDay();
             if (day <= 0) day = 1;
 

@@ -210,8 +210,13 @@ public class Athena {
         }
     }
 
-    public static List<Media> listMedia() {
+    public static int totalMedia() {
+        return mediaDirectory.list().length;
+    }
+
+    public static List<Media> listMedia(int start, int limit) {
         return Arrays.asList(mediaDirectory.list())
+            .subList(start, start + limit)
             .parallelStream()
             .map(Athena::getMedia)
             .filter((mediaId) -> mediaId != null) // Remove empty results.
@@ -224,7 +229,7 @@ public class Athena {
             .trim();
 
         if (query.length() == 0) {
-            return listMedia();
+            return listMedia(0, 10);
         }
 
         String $_query = query;

@@ -14,7 +14,7 @@ class WiiMCRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/api/wiimc/list")
     public HttpResponse onList(SoraHttpSession session) {
-        List<Media> mediaList = Athena.listMedia();
+        List<Media> mediaList = Athena.listMedia(0, Integer.MAX_VALUE);
 
         String playlistResponse = generatePlaylistForMedia(session.getHost(), mediaList);
 

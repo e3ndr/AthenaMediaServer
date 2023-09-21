@@ -17,9 +17,14 @@ class MediaRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/api/media")
     public HttpResponse onListMedia(SoraHttpSession session) {
+        int start = Integer.parseInt(session.getQueryParameters().getOrDefault("start", "0"));
+        int limit = Integer.parseInt(session.getQueryParameters().getOrDefault("limit", "20"));
+
         return new JsonResponse(
             StandardHttpStatus.OK,
-            JsonObject.singleton("list", Rson.DEFAULT.toJson(Athena.listMedia())),
+            new JsonObject()
+                .put("list", Rson.DEFAULT.toJson(Athena.listMedia(start, limit)))
+                .put("total", Athena.totalMedia()),
             Map.of("media", "GET /api/media/:mediaId")
         )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
