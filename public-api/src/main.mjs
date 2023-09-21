@@ -4,7 +4,11 @@ function handleCORS(request, response) {
     response.headers.set("Access-Control-Allow-Origin", "*");
     response.headers.set("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS");
     response.headers.set("Access-Control-Max-Age", "86400");
-    response.headers.set("Access-Control-Allow-Headers", request.headers.get("Access-Control-Request-Headers"));
+
+    const headersToApprove = request.headers.get("Access-Control-Request-Headers");
+    if (headersToApprove) {
+        response.headers.set("Access-Control-Allow-Headers", headersToApprove);
+    }
 }
 
 export default {
