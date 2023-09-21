@@ -29,9 +29,9 @@ export default (/** @type {import("itty-router").RouterType<import("itty-router"
                                 summary: movieData.overview,
                                 genres: movieData.genres.map((g) => g.name),
 
-                                day: releaseDay,
-                                month: releaseMonth,
-                                year: releaseYear,
+                                day: parseInt(releaseDay),
+                                month: parseInt(releaseMonth),
+                                year: parseInt(releaseYear),
 
                                 directors: movieData.credits.crew.filter((p) => p.job == "Director").map((p) => {
                                     return {
