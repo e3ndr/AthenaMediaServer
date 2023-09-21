@@ -54,7 +54,13 @@ export default (/** @type {import("itty-router").RouterType<import("itty-router"
                     }
 
                     console.debug("Success!");
-                    return response;
+                    return new Response(response.body, {
+                        status: response.status,
+                        headers: {
+                            "Content-Type": response.headers.get("Content-Type") || "application/octet-stream",
+                            "X-Athena-Proxy": "used"
+                        }
+                    });
                 }
 
                 default:
