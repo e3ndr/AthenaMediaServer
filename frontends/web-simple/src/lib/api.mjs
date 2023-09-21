@@ -1,10 +1,16 @@
 
 async function json(/** @type {string} */ url, /** @type {RequestInit | undefined} */ init) {
-    return await (await fetch(url, init)).json();
+    const response = await (await fetch(url, init)).json();
+
+    if (response.data) {
+        return response.data;
+    } else {
+        throw response.error;
+    }
 }
 
-export function listMedia(server) {
-    return json(server + '/media');
+export async function listMedia(server) {
+    return (await json(server + '/media')).list;
 }
 
 export function getMediaById(server, { mediaId }) {

@@ -6,6 +6,7 @@ import java.util.Map;
 import co.casterlabs.rakurai.io.http.StandardHttpStatus;
 import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.rakurai.json.Rson;
+import co.casterlabs.rakurai.json.element.JsonObject;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
@@ -18,7 +19,7 @@ class MediaRoutes implements HttpProvider {
     public HttpResponse onListMedia(SoraHttpSession session) {
         return new JsonResponse(
             StandardHttpStatus.OK,
-            Rson.DEFAULT.toJson(Athena.listMedia()),
+            JsonObject.singleton("list", Rson.DEFAULT.toJson(Athena.listMedia())),
             Map.of("media", "GET /api/media/:mediaId")
         )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));

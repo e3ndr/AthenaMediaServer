@@ -35,36 +35,31 @@
 
 				<table>
 					<tr>
-						<td>Directors:</td>
-						<td>
-							{data.media.info.people.directors.join(', ')}
-						</td>
-
 						<td>Studios:</td>
 						<td>
-							{data.media.info.studios.join(', ')}
-						</td>
-					</tr>
-					<tr>
-						<td>Writers:</td>
-						<td>
-							{data.media.info.people.writers.join(', ')}
+							{data.media.info.studios.map((s) => s.name).join(', ')}
 						</td>
 
-						<td>Video:</td>
+						<td>Directors:</td>
 						<td>
-							{data.media.files.streams.video.map((s) => s.name || s.codec).join(', ')}
+							{data.media.info.directors.map((p) => p.name).join(', ')}
 						</td>
 					</tr>
+					<tr />
 					<tr>
 						<td>Starring:</td>
 						<td>
-							{data.media.info.people.actors.join(', ')}
+							{data.media.info.actors.map((p) => p.name).join(', ')}
 						</td>
-
-						<td>Audio:</td>
+						<td>Codecs:</td>
 						<td>
-							{data.media.files.streams.audio.map((s) => s.name || s.codec).join(', ')}
+							{data.media.files.streams.video
+								.map((s) => s.name || s.codec.toUpperCase())
+								.join(', ')}
+							<br />
+							{data.media.files.streams.audio
+								.map((s) => s.name || s.codec.toUpperCase())
+								.join(', ')}
 						</td>
 					</tr>
 				</table>

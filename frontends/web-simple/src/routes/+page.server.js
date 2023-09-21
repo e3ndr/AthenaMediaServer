@@ -18,6 +18,7 @@ export async function load({ cookies, request }) {
         try {
             mediaList.push(...await API.listMedia(server));
         } catch (e) {
+            console.error(e);
             errors.push(e.toString());
         }
     }
