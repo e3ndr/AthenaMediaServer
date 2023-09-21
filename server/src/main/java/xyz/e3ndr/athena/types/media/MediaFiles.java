@@ -21,6 +21,7 @@ public class MediaFiles {
     @JsonClass(exposeAll = true)
     public static class Images {
         private @Nullable String posterUrl;
+        private @Nullable String backdropUrl;
 
     }
 

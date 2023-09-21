@@ -13,17 +13,16 @@ import lombok.NonNull;
 @JsonClass(exposeAll = true)
 public class MediaInfo {
     private @NonNull String title;
+    private @Nullable String summary;
+    private @Nullable String audienceRating; // null = unrated
+    private @NonNull List<String> genres;
 
     private int day = -1;
     private int month = -1;
     private int year = -1;
 
-    private @Nullable String summary;
-    private @Nullable String rating; // null = unrated
-
-    private @NonNull MediaInfo.People people;
-
-    private @NonNull List<String> genres;
+    private @NonNull List<Director> directors;
+    private @NonNull List<Actor> actors;
     private @NonNull List<String> studios;
 
     private @NonNull Ratings ratings;
@@ -31,10 +30,29 @@ public class MediaInfo {
     @Getter
     @NonNull
     @JsonClass(exposeAll = true)
-    public static class People {
-        private List<String> directors;
-        private List<String> writers;
-        private List<String> actors;
+    public static class Director {
+        private String id;
+        private String name;
+        private String imageUrl;
+    }
+
+    @Getter
+    @NonNull
+    @JsonClass(exposeAll = true)
+    public static class Actor {
+        private String id;
+        private String name;
+        private String playedCharacter;
+        private String imageUrl;
+    }
+
+    @Getter
+    @NonNull
+    @JsonClass(exposeAll = true)
+    public static class Studio {
+        private String id;
+        private String name;
+        private String logoUrl;
     }
 
     @Getter
