@@ -15,6 +15,7 @@ export class JsonResponse extends Response {
 const router = Router();
 
 (await import("./search.mjs")).default(router);
+(await import("./server-proxy.mjs")).default(router);
 
 router.get('/', () => {
   return new Response(`🍿 @ ${Date.now()}`);
