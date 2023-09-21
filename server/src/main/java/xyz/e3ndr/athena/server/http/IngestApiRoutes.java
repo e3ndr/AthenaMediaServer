@@ -97,15 +97,4 @@ class IngestApiRoutes implements HttpProvider {
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
     }
 
-    @HttpEndpoint(uri = "/api/omdb/apikey")
-    public HttpResponse onList(SoraHttpSession session) {
-        return HttpResponse
-            .newFixedLengthResponse(
-                StandardHttpStatus.OK,
-                JsonObject.singleton("apiKey", Athena.omdbApiKey)
-            )
-            .setMimeType("application/json")
-            .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));
-    }
-
 }

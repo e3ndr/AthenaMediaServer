@@ -65,9 +65,6 @@ public class Launcher {
                     System.exit(-1);
                 }
 
-                // omdbApiKey
-                Athena.omdbApiKey = config.getOmdbApiKey();
-
                 logger.debug("Using config: %s", config);
             } catch (JsonParseException e) {
                 logger.severe("Unable to parse config file, is it malformed?\n%s", e);

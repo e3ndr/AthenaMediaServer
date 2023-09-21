@@ -17,8 +17,6 @@ public class Config {
     private String cacheDirectory = "./Cache";
     private String ingestDirectory = "./Ingest";
 
-    private String omdbApiKey = "";
-
     private boolean enableCudaAcceleration;
 
     // -1 to disable.

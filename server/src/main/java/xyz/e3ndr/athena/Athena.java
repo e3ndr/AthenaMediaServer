@@ -39,8 +39,6 @@ public class Athena {
     public static File cacheDirectory;
     public static File ingestDirectory;
 
-    public static String omdbApiKey;
-
     public static boolean enableCudaAcceleration;
 
     public static List<MediaSession> mediaSessions = Collections.synchronizedList(new LinkedList<>());
