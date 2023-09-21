@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - main
-name: dev-deploy
+name: public-api-dev-deploy
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,10 +11,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: 'Install dependencies'
-        run: npm install
-      - name: 'Upload worker code to CloudFlare'
-        run: npm run publish
+      - name: "Install dependencies"
+        run: cd public-api && npm install
+      - name: "Upload worker code to CloudFlare"
+        run: cd public-api && npm run publish
         env:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
