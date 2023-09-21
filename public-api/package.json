@@ -1,0 +1,16 @@
+{
+  "name": "athenamediaserver-public-api",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "private": true,
+  "main": "src/main.mjs",
+  "scripts": {
+    "dev": "wrangler dev src/main.js",
+    "publish": "wrangler deploy"
+  },
+  "dependencies": {
+    "itty-router": "^4.0.13"
+  },
+  "devDependencies": {}
+}
