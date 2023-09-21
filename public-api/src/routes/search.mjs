@@ -1,5 +1,5 @@
+import { JsonResponse } from "../lib.mjs";
 import * as env from "../env.mjs";
-import { JsonResponse } from "./index.mjs";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/original";
 

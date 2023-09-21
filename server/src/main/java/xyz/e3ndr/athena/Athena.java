@@ -215,8 +215,9 @@ public class Athena {
     }
 
     public static List<Media> listMedia(int start, int limit) {
-        return Arrays.asList(mediaDirectory.list())
-            .subList(start, start + limit)
+        String[] fileList = mediaDirectory.list();
+        return Arrays.asList(fileList)
+            .subList(start, Math.min(fileList.length, start + limit))
             .parallelStream()
             .map(Athena::getMedia)
             .filter((mediaId) -> mediaId != null) // Remove empty results.

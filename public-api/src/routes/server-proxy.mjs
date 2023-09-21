@@ -1,13 +1,17 @@
-import { JsonResponse } from "./index.mjs";
+import { JsonResponse } from "../lib.mjs";
 
 async function isValidAthenaServer(url) {
-    const response = await (await fetch(`${url.protocol}${url.hostname}/.well-known/x-athena`)).text();
+    const response = await (await fetch(`${url.protocol}//${url.hostname}/.well-known/x-athena`)).text();
     return response.trim() == "yes";
 }
 
 function isAcceptableToProxy(response) {
-    const contentType = (response.headers.get("Content-Type") || "").split(";")[0];
-    if (!["text/plain", "application/json"].includes(contentType)) {
+    const contentType = response.headers.get("Content-Type") || "";
+
+    if (contentType.startsWith("application/json") || contentType.startsWith("text/")) {
+        return true;
+    } else {
+        console.debug("Content type:", contentType);
         throw "You may only use this proxy to make non-media requests.";
     }
 }
@@ -15,19 +19,18 @@ function isAcceptableToProxy(response) {
 export default (/** @type {import("itty-router").RouterType<import("itty-router").Route, any[]} */router) => {
 
     router.get("/server-proxy", async (request) => {
-        const url = new URL(new URL(request.url).searchParams.get("url"));
-
-        console.debug("Proxying request:", url);
-
         try {
+            const url = new URL(new URL(request.url).searchParams.get("url"));
+            console.debug("Proxying request:", url);
+
             switch (url.protocol) {
-                case "http":
-                case "https": {
-                    if (!isValidAthenaServer(url)) {
+                case "http:":
+                case "https:": {
+                    if (!await isValidAthenaServer(url)) {
                         console.debug("Not a valid Athena server.");
                         return new JsonResponse({
                             data: null,
-                            error: `The server url "${url.protocol}${url.hostname}" does not appear to be an Athena server.`,
+                            error: `The server url "${url.protocol}//${url.hostname}" does not appear to be an Athena server.`,
                             rel: null,
                         }, { status: 400 });
                     }

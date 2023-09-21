@@ -6,7 +6,7 @@
   "private": true,
   "main": "src/main.mjs",
   "scripts": {
-    "dev": "wrangler dev src/main.js",
+    "dev": "wrangler dev src/main.mjs",
     "publish": "wrangler deploy"
   },
   "dependencies": {
