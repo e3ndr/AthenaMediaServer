@@ -30,7 +30,7 @@ class UIRoutes implements HttpProvider {
     private static final String MEDIA_SEARCH_API = System.getProperty("athena.searchapi", "https://athenamediaserver-public-api.e3ndr.workers.dev/search?query=");
 
     @SneakyThrows
-    private static List<Media> searchForMedia(String query) {
+    private static List<Media> ingest_searchForMedia(String query) {
         URL url = new URL(MEDIA_SEARCH_API + UriEscape.escapeUriFragmentId(query));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
@@ -80,7 +80,7 @@ class UIRoutes implements HttpProvider {
         String toIngest = session.getQueryParameters().get("file");
         String query = session.getQueryParameters().getOrDefault("query", toIngest);
 
-        List<Media> searchResults = searchForMedia(query);
+        List<Media> searchResults = ingest_searchForMedia(query);
 
         HTMLBuilder html = new HTMLBuilder()
             .f("<a href=\"/ingest\" onclick=\"history.go(-1); return false;\">Go back</a>")
