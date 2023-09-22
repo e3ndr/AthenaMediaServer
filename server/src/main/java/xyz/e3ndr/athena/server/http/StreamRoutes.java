@@ -24,7 +24,7 @@ class StreamRoutes implements HttpProvider {
 
     @SneakyThrows
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/raw")
-    public HttpResponse onStream(SoraHttpSession session) {
+    public HttpResponse onStreamRAW(SoraHttpSession session) {
         Map<String, String> query = session.getQueryParameters();
 
         // Parameters.

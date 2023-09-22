@@ -9,7 +9,7 @@ import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 class MetaRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/.well-known/x-athena")
-    public HttpResponse onIngest(SoraHttpSession session) {
+    public HttpResponse onWellKnown(SoraHttpSession session) {
         return HttpResponse
             .newFixedLengthResponse(StandardHttpStatus.OK, "yes")
             .setMimeType("text/plain");
