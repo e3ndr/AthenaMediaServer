@@ -126,6 +126,12 @@ public class StreamRoutes implements HttpProvider {
     @SneakyThrows
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/hls")
     public HttpResponse onStreamHLS(SoraHttpSession session) {
+        String playlist = this.generateHLSPlaylist(session, "/api/media/%s/stream/raw");
+        return HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, playlist)
+            .setMimeType("application/vnd.apple.mpegurl");
+    }
+
+    public String generateHLSPlaylist(SoraHttpSession session, String uriBase) {
         final double DURATION = 8;
         String mediaId = session.getUriParameters().get("mediaId");
 
@@ -136,12 +142,11 @@ public class StreamRoutes implements HttpProvider {
             + "#EXT-X-MEDIA-SEQUENCE:0\r\n";
 
         // TODO
-        playlist += String.format("#EXTINF:%.1f,\r\n/api/media/%s/stream/raw%s&skipTo=%d\r\n", DURATION, mediaId, session.getQueryString(), -1);
+        playlist += String.format("#EXTINF:%.1f,\r\n%s%s&skipTo=%d\r\n", DURATION, uriBase, mediaId, session.getQueryString(), -1);
 
         playlist += "#EXT-X-ENDLIST";
 
-        return HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, playlist)
-            .setMimeType("application/vnd.apple.mpegurl");
+        return playlist;
     }
 
 }

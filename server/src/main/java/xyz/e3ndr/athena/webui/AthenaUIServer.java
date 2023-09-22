@@ -47,6 +47,7 @@ public class AthenaUIServer implements AthenaServer {
         @Override
         public void onInit(Sora sora) {
             sora.addProvider(this, new UIRoutes());
+            sora.addProvider(this, new InternalRoutes());
         }
 
         @Override
