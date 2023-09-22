@@ -30,7 +30,7 @@ class StreamRoutes implements HttpProvider {
         // Parameters.
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
-        VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.SOURCE.name()).toUpperCase());
+        VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());
         VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.H264_BASELINE.name()).toUpperCase());
         AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
         ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());

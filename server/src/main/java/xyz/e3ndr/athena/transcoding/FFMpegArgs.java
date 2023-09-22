@@ -28,13 +28,12 @@ public class FFMpegArgs {
     }
 
     public static List<String> v_getFF(VideoCodec codec, VideoQuality quality, boolean enableCuda) {
-        if (quality == VideoQuality.SOURCE) {
-            return Arrays.asList("-c:v", "copy");
-        }
-
         // TODO the more advanced parameters for HEVC and AV1
 
         switch (codec) {
+            case SOURCE:
+                Arrays.asList("-c:v", "copy");
+
             case H264_BASELINE:
             case H264_MAIN:
                 return getH264Args(codec, quality, enableCuda);

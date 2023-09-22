@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum VideoQuality {
-    SOURCE(-1, 5 * 1000),
-
     // @formatter:off
     UHD(2160, 10000),
     FHD(1080, 4000),

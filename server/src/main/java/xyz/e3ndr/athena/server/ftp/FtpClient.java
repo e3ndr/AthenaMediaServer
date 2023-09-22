@@ -31,8 +31,8 @@ class FtpClient extends Thread implements Closeable {
 
     // quality information, parsed from username
     private ContainerFormat containerFormat = ContainerFormat.MKV;
-    private VideoQuality videoQuality = VideoQuality.SOURCE;
-    private VideoCodec videoCodec = VideoCodec.H264_BASELINE;
+    private VideoQuality videoQuality = VideoQuality.UHD;
+    private VideoCodec videoCodec = VideoCodec.SOURCE;
     private AudioCodec audioCodec = AudioCodec.SOURCE;
 
     // control connection

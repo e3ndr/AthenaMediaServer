@@ -48,7 +48,7 @@ public class Transcoder {
         /* ---- Video ---- */
         command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.enableCudaAcceleration));
 
-        if (desiredQuality != VideoQuality.SOURCE) {
+        if (desiredVCodec != VideoCodec.SOURCE) {
             command.add("-b:v");
             command.add(String.format("%dK", desiredQuality.bitrate));
 
@@ -153,7 +153,7 @@ public class Transcoder {
         }
 
         List<String> codecs = new ArrayList<>();
-        codecs.add(desiredQuality == VideoQuality.SOURCE ? "source" : desiredVCodec.name().toLowerCase());
+        codecs.add(desiredVCodec.name().toLowerCase());
         codecs.add(desiredACodec.name().toLowerCase());
 
         return new File(
