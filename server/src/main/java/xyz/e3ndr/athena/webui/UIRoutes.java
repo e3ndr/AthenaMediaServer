@@ -41,6 +41,9 @@ class UIRoutes implements HttpProvider {
         List<Media> listOfMedia = Athena.listMedia((page - 1) * itemsPerPage, itemsPerPage);
 
         HTMLBuilder html = new HTMLBuilder();
+        html.f("<a href=\"/\" onclick=\"history.go(-1); return false;\">Go back</a>");
+        html.f("<br />");
+        html.f("<br />");
 
         for (Media media : listOfMedia) {
             html.f("<a");
@@ -85,6 +88,9 @@ class UIRoutes implements HttpProvider {
         String actors = String.join(", ", media.getInfo().getActors().stream().limit(4).map((p) -> p.getName()).collect(Collectors.toList()));
 
         return new HTMLBuilder()
+            .f("<a href=\"/media\" onclick=\"history.go(-1); return false;\">Go back</a>")
+            .f("<br />")
+            .f("<br />")
             .f("<table>")
             .f("  <tr>")
             .f("    <td>")
@@ -139,8 +145,11 @@ class UIRoutes implements HttpProvider {
         VideoQuality quality = VideoQuality.UHD;
 
         return new HTMLBuilder()
+            .f("<a href=\"/media/%s\" onclick=\"history.go(-1); return false;\">Go back</a>", media.getId())
+            .f("<br />")
+            .f("<br />")
             .f(
-                "<video src=\"/api/media/%s/stream/raw?format=%s&videoCodec=%s&audioCodec=%s&quality=%s\" controls fullscreen style=\"width: 100%%; height: 100%%;\" />",
+                "<video src=\"/_internal/media/%s/stream/raw?format=%s&videoCodec=%s&audioCodec=%s&quality=%s\" controls fullscreen style=\"width: 100%%; height: 100%%;\" />",
                 media.getId(),
                 container, vCodec, aCodec, quality
             )
