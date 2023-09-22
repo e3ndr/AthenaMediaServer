@@ -20,6 +20,8 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Transcoder {
 
@@ -65,6 +67,8 @@ public class Transcoder {
         command.add("-f");
         command.add(desiredContainer.ff);
         command.add("pipe:1");
+
+        FastLogger.logStatic(LogLevel.TRACE, command);
 
         final Process proc = new ProcessBuilder()
             .command(command)
@@ -159,7 +163,7 @@ public class Transcoder {
         return new File(
             Athena.cacheDirectory,
             String.format(
-                "%s/%s/%s/%s.%s",
+                "%s.%s.%s.%s.%s",
                 media.getId(),
                 desiredQuality.name().toLowerCase(),
                 String.join(",", codecs),
