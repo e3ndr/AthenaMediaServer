@@ -8,14 +8,15 @@ import org.jetbrains.annotations.Nullable;
 import co.casterlabs.rakurai.json.annotating.JsonClass;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 @Getter
 @NonNull
 @JsonClass(exposeAll = true)
 public class MediaFiles {
     private MediaFiles.Images images;
-    private MediaFiles.Streams streams;
-    private List<MediaFiles.Subtitle> subtitles;
+    private @Setter MediaFiles.Streams streams;
+    private @Setter List<MediaFiles.Subtitle> subtitles;
 
     @Getter
     @JsonClass(exposeAll = true)
@@ -26,6 +27,7 @@ public class MediaFiles {
     }
 
     @Getter
+    @Setter
     @NonNull
     @JsonClass(exposeAll = true)
     public static class Streams {
@@ -42,16 +44,18 @@ public class MediaFiles {
         }
 
         @Getter
+        @Setter
         @NonNull
         @JsonClass(exposeAll = true)
         public static class VideoStream extends Stream {
-            private int frameRate;
+            private double frameRate;
             private int width;
             private int height;
 
         }
 
         @Getter
+        @Setter
         @NonNull
         @JsonClass(exposeAll = true)
         public static class AudioStream extends Stream {
@@ -61,6 +65,7 @@ public class MediaFiles {
         }
 
         @Getter
+        @Setter
         @NonNull
         @JsonClass(exposeAll = true)
         public static abstract class Stream {
@@ -73,6 +78,7 @@ public class MediaFiles {
     }
 
     @Getter
+    @Setter
     @NonNull
     @JsonClass(exposeAll = true)
     public static class Subtitle {

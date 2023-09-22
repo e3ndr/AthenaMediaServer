@@ -1,9 +1,16 @@
 package xyz.e3ndr.athena.webui;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.unbescape.uri.UriEscape;
@@ -13,6 +20,7 @@ import co.casterlabs.rakurai.io.http.StandardHttpStatus;
 import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.TypeToken;
+import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonElement;
 import co.casterlabs.rakurai.json.element.JsonObject;
 import co.casterlabs.sora.api.http.HttpProvider;
@@ -20,11 +28,18 @@ import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 import lombok.SneakyThrows;
 import xyz.e3ndr.athena.Athena;
+import xyz.e3ndr.athena.transcoding.Transcoder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams.AudioStream;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams.Stream;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams.VideoStream;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
+import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 class UIRoutes implements HttpProvider {
     private static final String MEDIA_SEARCH_API = System.getProperty("athena.searchapi", "https://athenamediaserver-public-api.e3ndr.workers.dev/search?query=");
@@ -171,11 +186,13 @@ class UIRoutes implements HttpProvider {
 
         html
             .f("<h3>Streams</h3>")
-            .f("<form method=\"POST\" action=\"/ingest/finalize\">");
+            .f("<form method=\"GET\" action=\"/ingest/finalize\">");
 
         int codecIdx = 0;
         for (JsonElement e : Athena.getIngestableInfo(toIngest)) {
             JsonObject codec = e.getAsObject();
+
+            FastLogger.logStatic(LogLevel.DEBUG, "Codec in %s: %s", toIngest, codec);
 
             html
                 .f("<h4 style=\"margin-bottom: 0;\">Stream %d</h4>", codecIdx);
@@ -183,19 +200,52 @@ class UIRoutes implements HttpProvider {
             switch (codec.getString("codec_type")) {
                 case "video": {
                     String codecName = codec.getString("codec_name").toUpperCase();
+                    String frameRateCalc = codec.getString("avg_frame_rate");
+                    int width = codec.getNumber("width").intValue();
+                    int height = codec.getNumber("height").intValue();
+
+                    double frameRate;
+                    if (frameRateCalc.contains("/")) {
+                        String[] parts = frameRateCalc.split("/");
+                        double num = Double.parseDouble(parts[0]);
+                        double den = Double.parseDouble(parts[1]);
+                        frameRate = num / den;
+                    } else {
+                        frameRate = Double.parseDouble(frameRateCalc);
+                    }
+
                     html
                         .f("Name: <input type=\"input\" name=\"stream/%d/name\" value=\"%s\" />", codecIdx, codecName)
-                        .f("Default Video Stream?: <input type=\"radio\" name=\"video/default\" value=\"%d\" checked />", codecIdx, codecIdx);
+                        .f("Default Video Stream?: <input type=\"radio\" name=\"video/default\" value=\"%d\" checked />", codecIdx, codecIdx)
+                        .f("<input type=\"input\" name=\"stream/%d/codec\" value=\"%s\" style=\"display: none;\" />", codecIdx, codecName)
+                        .f("<input type=\"input\" name=\"stream/%d/frameRate\" value=\"%f\" style=\"display: none;\" />", codecIdx, frameRate)
+                        .f("<input type=\"input\" name=\"stream/%d/width\" value=\"%d\" style=\"display: none;\" />", codecIdx, width)
+                        .f("<input type=\"input\" name=\"stream/%d/height\" value=\"%d\" style=\"display: none;\" />", codecIdx, height)
+                        .f("<input type=\"input\" name=\"stream/%d/type\" value=\"video\" style=\"display: none;\" />", codecIdx);
                     break;
                 }
 
                 case "audio": {
-                    String codecName = codec.getString("codec_name").toUpperCase();
+                    String codecName = codec.getString("codec_name");
                     String channelLayout = codec.getString("channel_layout");
                     channelLayout = channelLayout.substring(0, 1).toUpperCase() + channelLayout.substring(1).toLowerCase();
+                    int channels = codec.getNumber("channels").intValue();
+
+                    String language = "Unknown";
+                    if (codec.containsKey("tags")) {
+                        JsonObject tags = codec.getObject("tags");
+                        if (tags.containsKey("language")) {
+                            language = tags.getString("language");
+                        }
+                    }
+
                     html
-                        .f("Name: <input type=\"input\" name=\"stream/%d/name\" value=\"%s (%s)\" />", codecIdx, channelLayout, codecName)
-                        .f("Default Audio Stream?: <input type=\"radio\" name=\"audio/default\" value=\"%d\" checked />", codecIdx, codecIdx);
+                        .f("Name: <input type=\"input\" name=\"stream/%d/name\" value=\"%s (%s)\" />", codecIdx, channelLayout, codecName.toUpperCase())
+                        .f("Language: <input type=\"input\" name=\"stream/%d/language\" value=\"%s\" />", codecIdx, language)
+                        .f("Default Audio Stream?: <input type=\"radio\" name=\"audio/default\" value=\"%d\" checked />", codecIdx, codecIdx)
+                        .f("<input type=\"input\" name=\"stream/%d/channels\" value=\"%s\" style=\"display: none;\" />", codecIdx, channels)
+                        .f("<input type=\"input\" name=\"stream/%d/codec\" value=\"%s\" style=\"display: none;\" />", codecIdx, codecName)
+                        .f("<input type=\"input\" name=\"stream/%d/type\" value=\"audio\" style=\"display: none;\" />", codecIdx);
                     break;
                 }
 
@@ -213,6 +263,126 @@ class UIRoutes implements HttpProvider {
             .f("</form>");
 
         return html.toResponse(StandardHttpStatus.OK);
+    }
+
+    @SneakyThrows
+    @HttpEndpoint(uri = "/ingest/finalize")
+    public HttpResponse onViewIngestFinalize(SoraHttpSession session) {
+        String toIngest = session.getQueryParameters().get("file");
+        Media media = Rson.DEFAULT.fromJson(UriEscape.unescapeUriQueryParam(session.getQueryParameters().get("media")), Media.class);
+
+        // Init.
+        media.getFiles().setStreams(new Streams());
+        media.getFiles().getStreams().setVideo(new LinkedList<>());
+        media.getFiles().getStreams().setAudio(new LinkedList<>());
+
+        // defaultStream
+        JsonArray defaultStreams = new JsonArray();
+        if (session.getQueryParameters().containsKey("video/default")) {
+            defaultStreams.add(Integer.parseInt(session.getQueryParameters().get("video/default")));
+        }
+        if (session.getQueryParameters().containsKey("audio/default")) {
+            defaultStreams.add(Integer.parseInt(session.getQueryParameters().get("audio/default")));
+        }
+        media.getFiles().getStreams().setDefaultStreams(Rson.DEFAULT.fromJson(defaultStreams, int[].class));
+
+        // streams
+        Map<Integer, JsonObject> streams = new HashMap<>();
+        for (String key : session.getQueryParameters().keySet()) {
+            if (!key.startsWith("stream")) continue;
+
+            String[] parts = key.split("/"); // stream/0/height=800
+
+            int index = Integer.parseInt(parts[1]);
+            String jsonKey = parts[2];
+            String value = session.getQueryParameters().get(key);
+
+            JsonObject json = streams.get(index);
+            if (json == null) {
+                json = new JsonObject();
+                json.put("id", index);
+                streams.put(index, json);
+            }
+
+            switch (jsonKey) {
+                // Needs numbers.
+                case "channels":
+                case "frameRate":
+                case "width":
+                case "height":
+                    json.put(jsonKey, Double.parseDouble(value));
+                    break;
+
+                default:
+                    json.put(jsonKey, value);
+                    break;
+            }
+        }
+
+        for (JsonObject json : streams.values()) {
+            switch (json.getString("type")) {
+                case "video":
+                    media
+                        .getFiles()
+                        .getStreams()
+                        .getVideo()
+                        .add(
+                            Rson.DEFAULT.fromJson(json, VideoStream.class)
+                        );
+                    break;
+
+                case "audio":
+                    media
+                        .getFiles()
+                        .getStreams()
+                        .getAudio()
+                        .add(
+                            Rson.DEFAULT.fromJson(json, AudioStream.class)
+                        );
+                    break;
+            }
+        }
+
+        File mediaDirectory = new File(Athena.mediaDirectory, media.getId());
+        new File(mediaDirectory, "subtitles").mkdirs();
+        new File(mediaDirectory, "streams").mkdirs();
+
+        File ingestFile = new File(Athena.ingestDirectory, toIngest);
+
+        // Write the index file.
+        Files.write(
+            new File(mediaDirectory, "index.json").toPath(),
+            Rson.DEFAULT
+                .toJson(media)
+                .toString(true)
+                .getBytes(StandardCharsets.UTF_8)
+        );
+
+        // Rip the streams to their own files for later muxing.
+        for (Stream stream : media.getFiles().getStreams().getAll()) {
+            int exitCode = new ProcessBuilder()
+                .command(
+                    Transcoder.FFMPEG_EXEC,
+                    "-i", ingestFile.getAbsolutePath(),
+                    "-map", String.format("0:%d", stream.getId()),
+                    "-c", "copy",
+                    new File(mediaDirectory, "streams/" + stream.getId() + ".mkv").getAbsolutePath()
+                )
+                .inheritIO()
+                .redirectInput(Redirect.PIPE)
+                .start()
+                .waitFor();
+            if (exitCode != 0) throw new IOException();
+        }
+
+        new File(Athena.ingestDirectory, "completed/").mkdir();
+        Files.move(
+            ingestFile.toPath(),
+            new File(Athena.ingestDirectory, "completed/" + toIngest).toPath()
+        );
+
+        return HttpResponse.newFixedLengthResponse(StandardHttpStatus.TEMPORARY_REDIRECT)
+            .putHeader("Location", "/media/" + media.getId());
     }
 
     @HttpEndpoint(uri = "/media")

@@ -24,11 +24,12 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
 public class Transcoder {
+    public static final String FFMPEG_EXEC = System.getProperty("athena.ffmpeg", "ffmpeg");
 
     @SneakyThrows
     public static TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         List<String> command = new LinkedList<>();
-        command.add("ffmpeg");
+        command.add(FFMPEG_EXEC);
         command.add("-hide_banner");
 //      command.add("-v");
 //      command.add("error");
