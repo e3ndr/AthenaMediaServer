@@ -13,7 +13,7 @@ import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 class UIRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/*")
-    public HttpResponse redirectToUI(SoraHttpSession session) {
+    public HttpResponse onViewIndex(SoraHttpSession session) {
         return html(
             "<h1>Welcome to Athena!</h1>",
         );
