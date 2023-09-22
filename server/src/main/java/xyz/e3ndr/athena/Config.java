@@ -20,6 +20,7 @@ public class Config {
     private boolean enableCudaAcceleration;
 
     // -1 to disable.
+    private int webUiPort = 8127;
     private int httpPort = 8125;
     private int ftpPort = 8126;
 

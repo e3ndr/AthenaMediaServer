@@ -6,8 +6,11 @@ import java.nio.file.Files;
 import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
+import co.casterlabs.sora.SoraFramework;
+import lombok.Getter;
 import xyz.e3ndr.athena.server.ftp.AthenaFtpServer;
 import xyz.e3ndr.athena.server.http.AthenaHttpServer;
+import xyz.e3ndr.athena.webui.AthenaUIServer;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -17,11 +20,15 @@ public class Launcher {
 
     private static final FastLogger logger = new FastLogger();
 
+    private static @Getter Config config;
+
     public static void main(String[] args) throws Exception {
         ClassLoader.getPlatformClassLoader().setDefaultAssertionStatus(true);
 
-        Config config = null;
+        // Some pre-init.
+        SoraFramework.LOGGER.setCurrentLevel(LogLevel.WARNING);
 
+        // Load the config.
         if (configFile.exists()) {
             try {
                 config = Rson.DEFAULT.fromJson(Files.readString(configFile.toPath()), Config.class);
@@ -76,9 +83,10 @@ public class Launcher {
 
         Files.writeString(configFile.toPath(), Rson.DEFAULT.toJson(config).toString(true));
 
-        Config $config_pointer = config;
-        AsyncTask.createNonDaemon(() -> new AthenaHttpServer().start($config_pointer));
-        AsyncTask.createNonDaemon(() -> new AthenaFtpServer().start($config_pointer));
+        // Go!
+        AsyncTask.createNonDaemon(() -> new AthenaHttpServer().start(config));
+        AsyncTask.createNonDaemon(() -> new AthenaFtpServer().start(config));
+        AsyncTask.createNonDaemon(() -> new AthenaUIServer().start(config));
     }
 
 }
