@@ -20,7 +20,8 @@ import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 
-class StreamRoutes implements HttpProvider {
+// Shared with Web UI
+public class StreamRoutes implements HttpProvider {
 
     @SneakyThrows
     @HttpEndpoint(uri = "/api/media/:mediaId/stream/raw")
@@ -31,7 +32,7 @@ class StreamRoutes implements HttpProvider {
         Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
 
         VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());
-        VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.H264_BASELINE.name()).toUpperCase());
+        VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.SOURCE.name()).toUpperCase());
         AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
         ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());
         long skipTo = Integer.parseInt(query.getOrDefault("skipTo", "-1"));
