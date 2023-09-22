@@ -32,7 +32,7 @@ public class FFMpegArgs {
 
         switch (codec) {
             case SOURCE:
-                Arrays.asList("-c:v", "copy");
+                return Arrays.asList("-c:v", "copy");
 
             case H264_BASELINE:
             case H264_MAIN:
