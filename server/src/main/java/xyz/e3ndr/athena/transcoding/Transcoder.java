@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -149,6 +151,7 @@ public class Transcoder {
         return session;
     }
 
+    @SneakyThrows
     public static File getFile(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
         List<String> str_streamIds = new ArrayList<>(streamIds.length);
         for (int streamId : streamIds) {
@@ -159,7 +162,7 @@ public class Transcoder {
         codecs.add(desiredVCodec.name().toLowerCase());
         codecs.add(desiredACodec.name().toLowerCase());
 
-        return new File(
+        File mediaFile = new File(
             Athena.cacheDirectory,
             String.format(
                 "%s.%s.%s.%s.%s",
@@ -170,6 +173,26 @@ public class Transcoder {
                 desiredContainer.name().toLowerCase()
             )
         );
+        File lastAccessedFile = new File(
+            Athena.cacheDirectory,
+            String.format(
+                "%s.%s.%s.%s.%s.lastaccess",
+                media.getId(),
+                desiredQuality.name().toLowerCase(),
+                String.join(",", codecs),
+                String.join(",", str_streamIds),
+                desiredContainer.name().toLowerCase()
+            )
+        );
+
+        // Write the last access time to disk, replacing any existing timestamp.
+        Files.write(
+            lastAccessedFile.toPath(),
+            String.valueOf(System.currentTimeMillis()).getBytes(),
+            StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING
+        );
+
+        return mediaFile;
     }
 
 }
