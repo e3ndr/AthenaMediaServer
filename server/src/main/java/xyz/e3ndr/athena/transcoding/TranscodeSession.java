@@ -10,7 +10,6 @@ import co.casterlabs.rakurai.json.annotating.JsonClass;
 import co.casterlabs.rakurai.json.annotating.JsonExclude;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
@@ -38,7 +37,7 @@ public class TranscodeSession {
     private double encodingProgress = 0;
     private double encodingSpeed = 0;
 
-    private @Setter boolean isComplete;
+    private boolean isComplete;
 
     @JsonExclude
     @ToString.Exclude
@@ -78,6 +77,10 @@ public class TranscodeSession {
 
             long currentTime = timestampToMillis(timeStr);
             this.encodingProgress = (double) currentTime / this.duration;
+
+            if (this.encodingProgress == 1) {
+                this.isComplete = true;
+            }
         }
 
         {

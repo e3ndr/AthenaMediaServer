@@ -117,8 +117,6 @@ public class Transcoder {
                 if (!hasStarted) {
                     startPromise.resolve(null); // Just in case...
                 }
-
-                session.setComplete(true);
             }
         });
 
