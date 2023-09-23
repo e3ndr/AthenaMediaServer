@@ -107,6 +107,12 @@ public class Athena {
         for (Process process : processes) {
             process.waitFor();
         }
+
+        new File(Athena.ingestDirectory, "completed/").mkdir();
+        Files.move(
+            mediaFile.toPath(),
+            new File(Athena.ingestDirectory, "completed/" + mediaFile.getName()).toPath()
+        );
     }
 
     public static void streamIngestable(String fileName, int streamId, OutputStream target) {

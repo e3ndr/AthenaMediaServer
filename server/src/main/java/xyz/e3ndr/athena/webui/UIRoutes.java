@@ -1,12 +1,8 @@
 package xyz.e3ndr.athena.webui;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.ProcessBuilder.Redirect;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +24,6 @@ import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 import lombok.SneakyThrows;
 import xyz.e3ndr.athena.Athena;
-import xyz.e3ndr.athena.transcoding.Transcoder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
@@ -36,7 +31,6 @@ import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams.AudioStream;
-import xyz.e3ndr.athena.types.media.MediaFiles.Streams.Stream;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams.VideoStream;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -343,43 +337,8 @@ class UIRoutes implements HttpProvider {
             }
         }
 
-        File mediaDirectory = new File(Athena.mediaDirectory, media.getId());
-        new File(mediaDirectory, "subtitles").mkdirs();
-        new File(mediaDirectory, "streams").mkdirs();
-
-        File ingestFile = new File(Athena.ingestDirectory, toIngest);
-
-        // Write the index file.
-        Files.write(
-            new File(mediaDirectory, "index.json").toPath(),
-            Rson.DEFAULT
-                .toJson(media)
-                .toString(true)
-                .getBytes(StandardCharsets.UTF_8)
-        );
-
         // Rip the streams to their own files for later muxing.
-        for (Stream stream : media.getFiles().getStreams().getAll()) {
-            int exitCode = new ProcessBuilder()
-                .command(
-                    Transcoder.FFMPEG_EXEC,
-                    "-i", ingestFile.getAbsolutePath(),
-                    "-map", String.format("0:%d", stream.getId()),
-                    "-c", "copy",
-                    new File(mediaDirectory, "streams/" + stream.getId() + ".mkv").getAbsolutePath()
-                )
-                .inheritIO()
-                .redirectInput(Redirect.PIPE)
-                .start()
-                .waitFor();
-            if (exitCode != 0) throw new IOException();
-        }
-
-        new File(Athena.ingestDirectory, "completed/").mkdir();
-        Files.move(
-            ingestFile.toPath(),
-            new File(Athena.ingestDirectory, "completed/" + toIngest).toPath()
-        );
+        Athena.ingest(toIngest, media);
 
         return HttpResponse.newFixedLengthResponse(StandardHttpStatus.TEMPORARY_REDIRECT)
             .putHeader("Location", "/media/" + media.getId());
