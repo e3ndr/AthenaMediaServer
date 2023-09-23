@@ -197,7 +197,15 @@ public class Athena {
         final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
         TranscodeSession transcodeSession = null;
 
-        if (!cacheFile.exists()) {
+        if (cacheFile.exists()) {
+            // See if there is a relevant transcode in-progress.
+            for (TranscodeSession existing : transcodeSessions) {
+                if (existing.getFile().equals(cacheFile.toString())) {
+                    transcodeSession = existing;
+                    break;
+                }
+            }
+        } else {
             transcodeSession = Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
         }
 
