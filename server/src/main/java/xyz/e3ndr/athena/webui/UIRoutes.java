@@ -360,7 +360,7 @@ class UIRoutes implements HttpProvider {
         List<Media> listOfMedia = Athena.listMedia((page - 1) * itemsPerPage, itemsPerPage);
 
         HTMLBuilder html = new HTMLBuilder();
-        html.f("<a href=\"/\" onclick=\"history.go(-1); return false;\">Go back</a>");
+        html.f("<a href=\"/\">Go back</a>");
         html.f("<br />");
         html.f("<br />");
 
@@ -407,7 +407,7 @@ class UIRoutes implements HttpProvider {
         String actors = String.join(", ", media.getInfo().getActors().stream().limit(4).map((p) -> p.getName()).collect(Collectors.toList()));
 
         return new HTMLBuilder()
-            .f("<a href=\"/media\" onclick=\"history.go(-1); return false;\">Go back</a>")
+            .f("<a href=\"/media\">Go back</a>")
             .f("<br />")
             .f("<br />")
             .f("<table style=\"background: url('%s'); background-size: cover; text-shadow: 0px 0px 4px white;\">", media.getFiles().getImages().getBackdropUrl())
@@ -477,7 +477,7 @@ class UIRoutes implements HttpProvider {
         }
 
         return new HTMLBuilder()
-            .f("<a href=\"/media/%s\" onclick=\"history.go(-1); return false;\">Go back</a>", media.getId())
+            .f("<a href=\"/media/%s\">Go back</a>", media.getId())
             .f("<br />")
             .f("<br />")
             .f(
