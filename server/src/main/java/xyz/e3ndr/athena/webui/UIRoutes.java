@@ -463,6 +463,19 @@ class UIRoutes implements HttpProvider {
         AudioCodec aCodec = AudioCodec.SOURCE;
         VideoQuality quality = VideoQuality.UHD;
 
+        String userAgent = session.getHeader("User-Agent");
+        if (userAgent.contains("Nintendo WiiU")) {
+            container = ContainerFormat.TS;
+            vCodec = VideoCodec.H264_BASELINE;
+            aCodec = AudioCodec.AAC;
+            quality = VideoQuality.FHD;
+        } else if (userAgent.contains("Windows Phone") || userAgent.contains("Trident/")) {
+            container = ContainerFormat.MP4;
+            vCodec = VideoCodec.H264_BASELINE;
+            aCodec = AudioCodec.AAC;
+            quality = VideoQuality.FHD;
+        }
+
         return new HTMLBuilder()
             .f("<a href=\"/media/%s\" onclick=\"history.go(-1); return false;\">Go back</a>", media.getId())
             .f("<br />")
