@@ -471,7 +471,7 @@ class UIRoutes implements HttpProvider {
             quality = VideoQuality.FHD;
         } else if (userAgent.contains("Windows Phone") || userAgent.contains("Trident/")) {
             container = ContainerFormat.MP4;
-            vCodec = VideoCodec.H264_BASELINE;
+            vCodec = VideoCodec.H264_HIGH;
             aCodec = AudioCodec.AAC;
             quality = VideoQuality.FHD;
         }
