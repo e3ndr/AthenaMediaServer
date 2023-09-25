@@ -16,13 +16,13 @@ public class FFMpegArgs {
                 return Arrays.asList("-c:a", "copy");
 
             case OPUS:
-                return Arrays.asList("-c:a", "libopus", "-b:a", "128k");
+                return Arrays.asList("-c:a", "libopus", "-b:a", "320k");
 
             case AAC:
-                return Arrays.asList("-c:a", "aac", "-b:a", "320k");
+                return Arrays.asList("-c:a", "aac", "-ac", "2", "-b:a", "156k");
 
             case MP3:
-                return Arrays.asList("-c:a", "mp3", "-b:a", "96k");
+                return Arrays.asList("-c:a", "mp3", "-ac", "2", "-b:a", "128k");
         }
         return null;
     }
@@ -69,14 +69,14 @@ public class FFMpegArgs {
             case H264_BASELINE:
                 args.add("-profile:v");
                 args.add("baseline");
-                args.add("-level:v");
-                args.add("1.0");
+//                args.add("-level:v");
+//                args.add("1.0");
                 break;
 
             case H264_HIGH:
                 args.add("-profile:v");
                 args.add("high");
-                args.add("-level:v");
+                args.add("-level");
                 args.add("5.0");
                 if (!enableCuda) {
                     args.add("-tune");
