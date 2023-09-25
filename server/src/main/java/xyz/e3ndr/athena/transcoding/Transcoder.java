@@ -103,6 +103,7 @@ public class Transcoder {
                             initInfoBuilder = null;
                             hasStarted = true;
                             session.logger.debug("Started!");
+                            session.logger.debug(initInfoBuilder);
                             startPromise.resolve(null);
                         }
 
