@@ -458,12 +458,24 @@ class UIRoutes implements HttpProvider {
             return HttpResponse.newFixedLengthResponse(StandardHttpStatus.NOT_FOUND);
         }
 
+        String videoUrl;
+
+        String userAgent = session.getHeader("User-Agent");
+//        if (userAgent.contains("Nintendo WiiU")) {
+//            VideoCodec vCodec = VideoCodec.H264_BASELINE;
+//            AudioCodec aCodec = AudioCodec.AAC;
+//            VideoQuality quality = VideoQuality.FHD;
+//
+//            videoUrl = String.format(
+//                "/_internal/media/%s/stream/hls/media.m3u8?videoCodec=%s&audioCodec=%s&quality=%s",
+//                media.getId(), vCodec, aCodec, quality
+//            );
+//        } else {
         ContainerFormat container = ContainerFormat.MKV;
         VideoCodec vCodec = VideoCodec.SOURCE;
         AudioCodec aCodec = AudioCodec.SOURCE;
         VideoQuality quality = VideoQuality.UHD;
 
-        String userAgent = session.getHeader("User-Agent");
         if (userAgent.contains("Nintendo WiiU")) {
             container = ContainerFormat.TS;
             vCodec = VideoCodec.H264_BASELINE;
@@ -476,15 +488,17 @@ class UIRoutes implements HttpProvider {
             quality = VideoQuality.FHD;
         }
 
+        videoUrl = String.format(
+            "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
+            media.getId(), container, vCodec, aCodec, quality
+        );
+//        }
+
         return new HTMLBuilder()
             .f("<a href=\"/media/%s\">Go back</a>", media.getId())
             .f("<br />")
             .f("<br />")
-            .f(
-                "<video src=\"/_internal/media/%s/stream/raw?format=%s&videoCodec=%s&audioCodec=%s&quality=%s\" controls fullscreen style=\"width: 100%%; height: 100%%;\" />",
-                media.getId(),
-                container, vCodec, aCodec, quality
-            )
+            .f("<video src=\"%s\" controls fullscreen style=\"width: 100%%; height: 100%%;\" />", videoUrl)
             .toResponse(StandardHttpStatus.OK);
     }
 
