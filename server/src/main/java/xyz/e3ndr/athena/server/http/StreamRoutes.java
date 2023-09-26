@@ -1,5 +1,6 @@
 package xyz.e3ndr.athena.server.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -23,19 +24,11 @@ import xyz.e3ndr.athena.types.media.Media;
 // Shared with Web UI
 public class StreamRoutes implements HttpProvider {
 
-    @SneakyThrows
-    @HttpEndpoint(uri = "/api/media/:mediaId/stream/raw")
-    public HttpResponse onStreamRAW(SoraHttpSession session) {
-        Map<String, String> query = session.getQueryParameters();
-
-        // Parameters.
-        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
-
+    private MediaSession startSession(Media media, Map<String, String> query) throws IOException {
         VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());
         VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.SOURCE.name()).toUpperCase());
         AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
         ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());
-        long skipTo = Integer.parseInt(query.getOrDefault("skipTo", "-1"));
 
         // Parse out the streamIds.
         int[] streamIds = null;
@@ -49,6 +42,29 @@ public class StreamRoutes implements HttpProvider {
             }
         } else {
             streamIds = media.getFiles().getStreams().getDefaultStreams();
+        }
+
+        // Load the file.
+        return Athena.startStream(
+            media,
+            videoQuality,
+            videoCodec, audioCodec,
+            containerFormat,
+            streamIds
+        );
+    }
+
+    @SneakyThrows
+    @HttpEndpoint(uri = "/api/media/:mediaId/stream")
+    public HttpResponse onStreamRAW(SoraHttpSession session) {
+        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
+        MediaSession mediaSession = startSession(media, session.getQueryParameters());
+
+        String mimeType;
+        if (mediaSession.getContainerFormat() == ContainerFormat.MKV) {
+            mimeType = "video/x-matroska";
+        } else {
+            mimeType = String.format("video/%s", mediaSession.getContainerFormat().name()).toLowerCase();
         }
 
         // Making this a huge number prevents browsers from seeking to the end of the
@@ -74,30 +90,13 @@ public class StreamRoutes implements HttpProvider {
 
         long chunkLength = endAt - startAt;
 
-        // Response.
-        String mimeType;
-        if (containerFormat == ContainerFormat.MKV) {
-            mimeType = "video/x-matroska";
-        } else {
-            mimeType = String.format("video/%s", containerFormat.name()).toLowerCase();
-        }
-
-        // Load the file.
-        MediaSession mediaSession = Athena.startStream(
-            media,
-            videoQuality,
-            videoCodec, audioCodec,
-            containerFormat,
-            streamIds
-        );
-
         long $_startAt = startAt;
         HttpResponse resp = new HttpResponse(
             new ResponseContent() {
                 @Override
                 public void write(OutputStream out) {
                     // We do our own write routines.
-                    mediaSession.start($_startAt, chunkLength, skipTo, out);
+                    mediaSession.start($_startAt, chunkLength, out);
                 }
 
                 @Override
@@ -113,7 +112,7 @@ public class StreamRoutes implements HttpProvider {
             .setMimeType(mimeType)
             .putHeader("Accept-Ranges", "bytes")
             .putHeader("Cache-Control", "no-store, no-cache, no-transform")
-            .putHeader("ETag", Integer.toHexString(media.getId().hashCode()));
+            .putHeader("ETag", Integer.toHexString(mediaSession.getMediaId().hashCode()));
 
         if (requestedRange) {
             resp.putHeader("Content-Range", String.format("bytes %d-%d/%d", startAt, endAt, fileLength));
@@ -124,29 +123,33 @@ public class StreamRoutes implements HttpProvider {
     }
 
     @SneakyThrows
-    @HttpEndpoint(uri = "/api/media/:mediaId/stream/hls")
+    @HttpEndpoint(uri = "/api/media/:mediaId/stream/hls/:file")
     public HttpResponse onStreamHLS(SoraHttpSession session) {
-        String playlist = this.generateHLSPlaylist(session, "/api/media/%s/stream/raw");
-        return HttpResponse.newFixedLengthResponse(StandardHttpStatus.OK, playlist)
-            .setMimeType("application/vnd.apple.mpegurl");
-    }
+        VideoQuality videoQuality = VideoQuality.valueOf(session.getQueryParameters().getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());
+        VideoCodec videoCodec = VideoCodec.valueOf(session.getQueryParameters().getOrDefault("videoCodec", VideoCodec.H264_HIGH.name()).toUpperCase());
+        AudioCodec audioCodec = AudioCodec.valueOf(session.getQueryParameters().getOrDefault("audioCodec", AudioCodec.AAC.name()).toUpperCase());
+        ContainerFormat containerFormat = ContainerFormat.HLS;
 
-    public String generateHLSPlaylist(SoraHttpSession session, String uriBase) {
-        final double DURATION = 8;
-        String mediaId = session.getUriParameters().get("mediaId");
+        Map<String, String> query = Map.of(
+            "quality", videoQuality.name(),
+            "videoCodec", videoCodec.name(),
+            "audioCodec", audioCodec.name(),
+            "format", containerFormat.name()
+        );
 
-        String playlist = "#EXTM3U\r\n"
-            + "#EXT-X-PLAYLIST-TYPE:VOD\r\n"
-            + "#EXT-X-TARGETDURATION:" + DURATION + "\r\n"
-            + "#EXT-X-VERSION:4\r\n"
-            + "#EXT-X-MEDIA-SEQUENCE:0\r\n";
+        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
+        MediaSession mediaSession = startSession(media, query); // Dummy session.
 
-        // TODO
-        playlist += String.format("#EXTINF:%.1f,\r\n%s%s&skipTo=%d\r\n", DURATION, uriBase, mediaId, session.getQueryString(), -1);
+        // TODO Figure out a way to make the dummy session persist in Athena's session
+        // list.
 
-        playlist += "#EXT-X-ENDLIST";
+        File file = new File(mediaSession.getFile(), session.getUriParameters().get("file"));
 
-        return playlist;
+        while (!file.exists()) {
+            Thread.sleep(5000); // Wait.
+        }
+
+        return HttpResponse.newFixedLengthFileResponse(StandardHttpStatus.OK, file);
     }
 
 }

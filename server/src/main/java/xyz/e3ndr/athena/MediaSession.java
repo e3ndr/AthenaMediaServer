@@ -38,6 +38,7 @@ public class MediaSession {
     private VideoQuality videoQuality;
     private VideoCodec videoCodec;
     private AudioCodec audioCodec;
+    private ContainerFormat containerFormat;
     private int[] streamIds;
 
     private long bytesWritten = 0;
@@ -57,14 +58,12 @@ public class MediaSession {
         this.videoQuality = desiredQuality;
         this.videoCodec = desiredVCodec;
         this.audioCodec = desiredACodec;
+        this.containerFormat = desiredContainer;
         this.streamIds = streamIds;
     }
 
-    public void start(long skip, long maxLength, long skipTo, OutputStream target) {
+    public void start(long skip, long maxLength, OutputStream target) {
         Athena.mediaSessions.add(this);
-
-        // TODO recreate the container on the fly and allow for timestamp skipping
-        // (skipTo).
 
         try (
             FileChannel fileChannel = FileChannel.open(this.file.toPath(), EnumSet.of(StandardOpenOption.READ));
