@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+import org.jetbrains.annotations.Nullable;
+
 import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.commons.async.PromiseWithHandles;
 import co.casterlabs.rakurai.io.IOUtil;
@@ -26,6 +28,7 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Transcoder {
     public static final String FFMPEG_EXEC = System.getProperty("athena.ffmpeg", "ffmpeg");
@@ -34,8 +37,15 @@ public class Transcoder {
     public static final int HLS_RATE = 25;
     public static final int HLS_INTERVAL = 10;
 
+    private static final FastLogger logger = new FastLogger();
+
     @SneakyThrows
-    public static TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+    public static @Nullable TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+        if (!Athena.config.transcoding.enable && (desiredACodec != AudioCodec.SOURCE || desiredVCodec != VideoCodec.SOURCE)) {
+            logger.severe("Transcoding is disabled, but a session was requested.");
+            return null;
+        }
+
         List<String> command = new LinkedList<>();
         command.add(FFMPEG_EXEC);
         command.add("-hide_banner");

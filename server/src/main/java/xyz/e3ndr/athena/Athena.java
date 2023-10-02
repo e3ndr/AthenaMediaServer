@@ -199,7 +199,7 @@ public class Athena {
     /* Media                */
     /* -------------------- */
 
-    public static MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
+    public static @Nullable MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
         final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
         TranscodeSession transcodeSession = null;
 
@@ -213,6 +213,7 @@ public class Athena {
             }
         } else {
             transcodeSession = Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+            if (transcodeSession == null) return null; // Couldn't start transcode, check the logs.
         }
 
         return new MediaSession(cacheFile, transcodeSession, media.getId(), desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);

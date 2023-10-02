@@ -58,6 +58,7 @@ public class Config {
     @ToString
     @JsonClass(exposeAll = true)
     public static class TranscodeConfig {
+        public boolean enable = true;
         public TranscodeAcceleration acceleration = TranscodeAcceleration.SOFTWARE_ONLY;
 
         public static enum TranscodeAcceleration {
