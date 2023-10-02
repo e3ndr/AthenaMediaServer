@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.server.ftp;
+package xyz.e3ndr.athena.service.ftp;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import xyz.e3ndr.athena.Athena;
-import xyz.e3ndr.athena.server.AthenaServer;
+import xyz.e3ndr.athena.service.AthenaService;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -17,14 +17,14 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
  * 
  * @author Moritz Stueckler
  */
-public class AthenaFtpServer implements AthenaServer {
+public class AthenaFtpServer implements AthenaService {
     private static final int MAX_CLIENTS = 100;
     private static final int FTP_PORT_RANGE_OFFSET = 100;
     static final List<Integer> openPorts = Collections.synchronizedList(new LinkedList<>());
 
     @SuppressWarnings("resource")
     @Override
-    public void start() {
+    public void init() {
         int controlPort = Athena.config.services.ftp.port;
 
         // Generate a list of ports.

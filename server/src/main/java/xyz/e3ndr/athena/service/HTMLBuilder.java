@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.webui;
+package xyz.e3ndr.athena.service;
 
 import java.util.Arrays;
 import java.util.LinkedList;

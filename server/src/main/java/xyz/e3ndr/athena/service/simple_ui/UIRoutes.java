@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.webui;
+package xyz.e3ndr.athena.service.simple_ui;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -24,6 +24,7 @@ import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
 import lombok.SneakyThrows;
 import xyz.e3ndr.athena.Athena;
+import xyz.e3ndr.athena.service.HTMLBuilder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;

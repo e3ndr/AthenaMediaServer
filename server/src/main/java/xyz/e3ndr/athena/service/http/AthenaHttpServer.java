@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.webui;
+package xyz.e3ndr.athena.service.http;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -8,16 +8,16 @@ import co.casterlabs.sora.SoraLauncher;
 import co.casterlabs.sora.api.SoraPlugin;
 import lombok.NonNull;
 import xyz.e3ndr.athena.Athena;
-import xyz.e3ndr.athena.server.AthenaServer;
+import xyz.e3ndr.athena.service.AthenaService;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class AthenaUIServer implements AthenaServer {
+public class AthenaHttpServer implements AthenaService {
 
     @Override
-    public void start() {
+    public void init() {
         try {
-            int port = Athena.config.services.simpleUI.port;
+            int port = Athena.config.services.http.port;
 
             SoraFramework framework = new SoraLauncher()
                 .setPort(port)
@@ -44,8 +44,12 @@ public class AthenaUIServer implements AthenaServer {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addProvider(this, new UIRoutes());
-            sora.addProvider(this, new InternalRoutes());
+            sora.addProvider(this, new MetaRoutes());
+            sora.addProvider(this, new MediaRoutes());
+            sora.addProvider(this, new StreamRoutes());
+            sora.addProvider(this, new SessionRoutes());
+            sora.addProvider(this, new WiiMCRoutes());
+            sora.addProvider(this, new IngestApiRoutes());
         }
 
         @Override
@@ -63,12 +67,12 @@ public class AthenaUIServer implements AthenaServer {
 
         @Override
         public @NonNull String getName() {
-            return "Athena Web UI";
+            return "Athena";
         }
 
         @Override
         public @NonNull String getId() {
-            return "athena-webui";
+            return "athena";
         }
 
     }

@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.server.ftp;
+package xyz.e3ndr.athena.service.ftp;
 
 enum LoginState {
     WAITING_FOR_USERNAME,

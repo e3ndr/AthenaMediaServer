@@ -1,10 +1,10 @@
-package xyz.e3ndr.athena.webui;
+package xyz.e3ndr.athena.service.simple_ui;
 
 import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
-import xyz.e3ndr.athena.server.http.StreamRoutes;
+import xyz.e3ndr.athena.service.http.StreamRoutes;
 
 class InternalRoutes implements HttpProvider {
     private StreamRoutes streamRoutes = new StreamRoutes();

@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.server.http;
+package xyz.e3ndr.athena.service.http;
 
 import java.util.Arrays;
 import java.util.Map;
