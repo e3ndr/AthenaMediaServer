@@ -21,14 +21,14 @@ class MetaRoutes implements HttpProvider {
         if (Athena.config.services.simpleUI.enable) {
             return HttpResponse
                 .newFixedLengthResponse(
-                    StandardHttpStatus.OK,
+                    StandardHttpStatus.NOT_FOUND,
                     "There's nothing here....."
                 )
                 .setMimeType("text/plain");
         } else {
             return HttpResponse
                 .newFixedLengthResponse(
-                    StandardHttpStatus.OK,
+                    StandardHttpStatus.NOT_FOUND,
                     "There's nothing here..... Are you looking for the UI? If so, that's on port " + Athena.config.services.simpleUI.port + "."
                 )
                 .setMimeType("text/plain");
