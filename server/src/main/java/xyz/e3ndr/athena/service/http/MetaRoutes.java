@@ -17,7 +17,7 @@ class MetaRoutes implements HttpProvider {
     }
 
     @HttpEndpoint(uri = "/*")
-    public HttpResponse onGetIndex(SoraHttpSession session) {
+    public HttpResponse onGetMissing(SoraHttpSession session) {
         if (Athena.config.services.simpleUI.enable) {
             return HttpResponse
                 .newFixedLengthResponse(
