@@ -19,6 +19,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
  */
 public class AthenaFtpServer implements AthenaServer {
     private static final int MAX_CLIENTS = 100;
+    private static final int FTP_PORT_RANGE_OFFSET = 100;
     static final List<Integer> openPorts = Collections.synchronizedList(new LinkedList<>());
 
     @SuppressWarnings("resource")
@@ -28,8 +29,8 @@ public class AthenaFtpServer implements AthenaServer {
         if (controlPort == -1) return;
 
         // Generate a list of ports.
-        for (int port = controlPort + 1; port < controlPort + MAX_CLIENTS; port++) {
-            openPorts.add(port);
+        for (int idx = 0; idx < +MAX_CLIENTS; idx++) {
+            openPorts.add(idx + controlPort + FTP_PORT_RANGE_OFFSET);
         }
 
         try (ServerSocket welcomeListener = new ServerSocket(controlPort)) {
