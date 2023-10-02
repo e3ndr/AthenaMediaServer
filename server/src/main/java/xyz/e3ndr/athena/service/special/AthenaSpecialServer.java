@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.service.http;
+package xyz.e3ndr.athena.service.special;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +12,7 @@ import xyz.e3ndr.athena.service.AthenaService;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class AthenaHttpServer implements AthenaService {
+public class AthenaSpecialServer implements AthenaService {
 
     @Override
     public void init() {
@@ -34,9 +34,9 @@ public class AthenaHttpServer implements AthenaService {
 
             framework.startHttpServer();
 
-            FastLogger.logStatic("Started http server on %d!", port);
+            FastLogger.logStatic("Started special server on %d!", port);
         } catch (Exception e) {
-            FastLogger.logStatic(LogLevel.SEVERE, "Unable to start http server:\n%s", e);
+            FastLogger.logStatic(LogLevel.SEVERE, "Unable to start special server:\n%s", e);
         }
     }
 
@@ -44,11 +44,8 @@ public class AthenaHttpServer implements AthenaService {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addProvider(this, new MetaRoutes());
-            sora.addProvider(this, new MediaRoutes());
-            sora.addProvider(this, new StreamRoutes());
-            sora.addProvider(this, new SessionRoutes());
-            sora.addProvider(this, new IngestApiRoutes());
+            sora.addProvider(this, new WiiMCRoutes());
+            sora.addProvider(this, new InternalRoutes());
         }
 
         @Override

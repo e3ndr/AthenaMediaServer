@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.service.http;
+package xyz.e3ndr.athena.service.special;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import xyz.e3ndr.athena.types.media.Media;
 
 class WiiMCRoutes implements HttpProvider {
 
-    @HttpEndpoint(uri = "/api/wiimc/list")
+    @HttpEndpoint(uri = "/wiimc/list")
     public HttpResponse onList(SoraHttpSession session) {
         List<Media> mediaList = Athena.listMedia(0, Integer.MAX_VALUE);
 
@@ -25,7 +25,7 @@ class WiiMCRoutes implements HttpProvider {
             .setMimeType("text/plain");
     }
 
-    @HttpEndpoint(uri = "/api/wiimc/search")
+    @HttpEndpoint(uri = "/wiimc/search")
     public HttpResponse onSearch(SoraHttpSession session) {
         String query = session.getQueryParameters().getOrDefault("q", "");
         List<Media> mediaList = Athena.searchMedia(query);
@@ -46,7 +46,7 @@ class WiiMCRoutes implements HttpProvider {
         int idx = 1;
         for (Media media : mediaList) {
             String url = String.format(
-                "http://%s/api/media/%s/stream/raw?quality=SD&format=MKV&videoCodec=H264&audioCodec=AAC",
+                "http://%s/_internal/media/%s/stream/raw?quality=SD&format=MKV&videoCodec=H264&audioCodec=AAC",
                 host, media.getId()
             );
 

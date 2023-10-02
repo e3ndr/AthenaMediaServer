@@ -25,7 +25,7 @@ public class Config {
         public HttpServiceConfig http = new HttpServiceConfig();
         public FtpServiceConfig ftp = new FtpServiceConfig();
         public @JsonField("simple_ui") SimpleUIConfig simpleUI = new SimpleUIConfig();
-        public @JsonField("wii_mc") WiiMCServiceConfig wiimc = new WiiMCServiceConfig();
+        public @JsonField("special") SpecialServiceConfig special = new SpecialServiceConfig();
 
         @ToString
         @JsonClass(exposeAll = true)
@@ -46,6 +46,13 @@ public class Config {
         public static class SimpleUIConfig {
             public boolean enable = true;
             public int port = 8127;
+        }
+
+        @ToString
+        @JsonClass(exposeAll = true)
+        public static class SpecialServiceConfig {
+            public boolean enable = false;
+            public int port = 8128;
         }
 
     }

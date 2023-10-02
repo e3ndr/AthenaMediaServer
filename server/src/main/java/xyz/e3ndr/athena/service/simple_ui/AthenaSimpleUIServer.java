@@ -40,7 +40,7 @@ public class AthenaSimpleUIServer implements AthenaService {
         }
     }
 
-    public static class AthenaSoraAdapter extends SoraPlugin {
+    static class AthenaSoraAdapter extends SoraPlugin {
 
         @Override
         public void onInit(Sora sora) {
