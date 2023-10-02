@@ -5,7 +5,7 @@ import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
-import xyz.e3ndr.athena.Launcher;
+import xyz.e3ndr.athena.Athena;
 
 class MetaRoutes implements HttpProvider {
 
@@ -18,9 +18,7 @@ class MetaRoutes implements HttpProvider {
 
     @HttpEndpoint(uri = "/*")
     public HttpResponse onGetIndex(SoraHttpSession session) {
-        int webUiPort = Launcher.getConfig().getWebUiPort();
-
-        if (webUiPort == -1) {
+        if (Athena.config.services.simpleUI.enable) {
             return HttpResponse
                 .newFixedLengthResponse(
                     StandardHttpStatus.OK,
@@ -31,7 +29,7 @@ class MetaRoutes implements HttpProvider {
             return HttpResponse
                 .newFixedLengthResponse(
                     StandardHttpStatus.OK,
-                    "There's nothing here..... Are you looking for the UI? If so, that's on port " + webUiPort + "."
+                    "There's nothing here..... Are you looking for the UI? If so, that's on port " + Athena.config.services.simpleUI.port + "."
                 )
                 .setMimeType("text/plain");
         }

@@ -57,7 +57,7 @@ public class Transcoder {
         }
 
         /* ---- Video ---- */
-        command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.enableCudaAcceleration));
+        command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.config.transcoding.acceleration));
 
         if (desiredVCodec != VideoCodec.SOURCE) {
             command.add("-b:v");

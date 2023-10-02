@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import xyz.e3ndr.athena.Config;
+import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.server.AthenaServer;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -24,9 +24,8 @@ public class AthenaFtpServer implements AthenaServer {
 
     @SuppressWarnings("resource")
     @Override
-    public void start(Config config) {
-        int controlPort = config.getFtpPort();
-        if (controlPort == -1) return;
+    public void start() {
+        int controlPort = Athena.config.services.ftp.port;
 
         // Generate a list of ports.
         for (int idx = 0; idx < +MAX_CLIENTS; idx++) {

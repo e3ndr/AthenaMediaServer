@@ -7,7 +7,7 @@ import co.casterlabs.sora.SoraFramework;
 import co.casterlabs.sora.SoraLauncher;
 import co.casterlabs.sora.api.SoraPlugin;
 import lombok.NonNull;
-import xyz.e3ndr.athena.Config;
+import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.server.AthenaServer;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -15,11 +15,9 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 public class AthenaHttpServer implements AthenaServer {
 
     @Override
-    public void start(Config config) {
+    public void start() {
         try {
-            int port = config.getHttpPort();
-
-            if (port == -1) return;
+            int port = Athena.config.services.http.port;
 
             SoraFramework framework = new SoraLauncher()
                 .setPort(port)

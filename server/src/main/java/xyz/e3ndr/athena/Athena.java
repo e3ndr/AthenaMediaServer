@@ -37,11 +37,17 @@ public class Athena {
     public static final int STREAMING_BUFFER_SIZE = 64/*kb*/ * 1000;
     public static final int TRANSCODING_BUFFER_SIZE = 512/*kb*/ * 1000;
 
-    public static File mediaDirectory;
-    public static File cacheDirectory;
-    public static File ingestDirectory;
+    public static final File mediaDirectory = new File("./Media");
+    public static final File cacheDirectory = new File("./Cache");
+    public static final File ingestDirectory = new File("./Ingest");
 
-    public static boolean enableCudaAcceleration;
+    static {
+        Athena.mediaDirectory.mkdirs();
+        Athena.cacheDirectory.mkdirs();
+        Athena.ingestDirectory.mkdirs();
+    }
+
+    public static Config config = new Config();
 
     public static List<MediaSession> mediaSessions = Collections.synchronizedList(new LinkedList<>());
     public static List<TranscodeSession> transcodeSessions = Collections.synchronizedList(new LinkedList<>());

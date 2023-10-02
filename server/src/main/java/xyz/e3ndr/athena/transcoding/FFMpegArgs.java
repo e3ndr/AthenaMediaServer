@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import xyz.e3ndr.athena.Config.TranscodeConfig.TranscodeAcceleration;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
@@ -27,7 +28,7 @@ public class FFMpegArgs {
         return null;
     }
 
-    public static List<String> v_getFF(VideoCodec codec, VideoQuality quality, boolean enableCuda) {
+    public static List<String> v_getFF(VideoCodec codec, VideoQuality quality, TranscodeAcceleration acceleration) {
         // TODO the more advanced parameters for HEVC and AV1
 
         switch (codec) {
@@ -36,13 +37,15 @@ public class FFMpegArgs {
 
             case H264_BASELINE:
             case H264_HIGH:
-                return getH264Args(codec, quality, enableCuda);
+                return getH264Args(codec, quality, acceleration);
 
             case HEVC:
-                if (enableCuda) {
-                    return Arrays.asList("-c:v", "hevc_nvenc");
-                } else {
-                    return Arrays.asList("-c:v", "hevc");
+                switch (acceleration) {
+                    case NVIDIA_PREFERRED:
+                        return Arrays.asList("-c:v", "hevc_nvenc");
+
+                    case SOFTWARE_ONLY:
+                        return Arrays.asList("-c:v", "hevc");
                 }
 
             case AV1:
@@ -54,15 +57,19 @@ public class FFMpegArgs {
         return null;
     }
 
-    private static List<String> getH264Args(VideoCodec codec, VideoQuality quality, boolean enableCuda) {
+    private static List<String> getH264Args(VideoCodec codec, VideoQuality quality, TranscodeAcceleration acceleration) {
         List<String> args = new LinkedList<>();
 
-        if (enableCuda) {
-            args.add("-c:v");
-            args.add("h264_nvenc");
-        } else {
-            args.add("-c:v");
-            args.add("h264");
+        switch (acceleration) {
+            case NVIDIA_PREFERRED:
+                args.add("-c:v");
+                args.add("h264_nvenc");
+                break;
+
+            case SOFTWARE_ONLY:
+                args.add("-c:v");
+                args.add("h264");
+                break;
         }
 
         switch (codec) {
@@ -78,7 +85,8 @@ public class FFMpegArgs {
                 args.add("high");
                 args.add("-level");
                 args.add("5.0");
-                if (!enableCuda) {
+                if (acceleration != TranscodeAcceleration.NVIDIA_PREFERRED) {
+                    // NVIDIA does not support tune.
                     args.add("-tune");
                     args.add("film");
                 }
