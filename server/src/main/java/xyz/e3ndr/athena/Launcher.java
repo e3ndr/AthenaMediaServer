@@ -7,9 +7,9 @@ import co.casterlabs.commons.async.AsyncTask;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.serialization.JsonParseException;
 import co.casterlabs.sora.SoraFramework;
-import xyz.e3ndr.athena.service.ftp.AthenaFtpServer;
-import xyz.e3ndr.athena.service.http.AthenaHttpServer;
-import xyz.e3ndr.athena.service.simple_ui.AthenaSimpleUIServer;
+import xyz.e3ndr.athena.service.ftp.AthenaFtpService;
+import xyz.e3ndr.athena.service.http.AthenaHttpService;
+import xyz.e3ndr.athena.service.simple_ui.AthenaSimpleUIService;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -48,15 +48,15 @@ public class Launcher {
 
         // Go!
         if (Athena.config.services.http.enable) {
-            AsyncTask.createNonDaemon(() -> new AthenaHttpServer().init());
+            AsyncTask.createNonDaemon(() -> new AthenaHttpService().init());
         }
 
         if (Athena.config.services.http.enable) {
-            AsyncTask.createNonDaemon(() -> new AthenaFtpServer().init());
+            AsyncTask.createNonDaemon(() -> new AthenaFtpService().init());
         }
 
         if (Athena.config.services.simpleUI.enable) {
-            AsyncTask.createNonDaemon(() -> new AthenaSimpleUIServer().init());
+            AsyncTask.createNonDaemon(() -> new AthenaSimpleUIService().init());
         }
     }
 

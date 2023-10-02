@@ -17,7 +17,7 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
  * 
  * @author Moritz Stueckler
  */
-public class AthenaFtpServer implements AthenaService {
+public class AthenaFtpService implements AthenaService {
     private static final int MAX_CLIENTS = 100;
     private static final int FTP_PORT_RANGE_OFFSET = 100;
     static final List<Integer> openPorts = Collections.synchronizedList(new LinkedList<>());

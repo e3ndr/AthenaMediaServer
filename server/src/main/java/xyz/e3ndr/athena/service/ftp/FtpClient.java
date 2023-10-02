@@ -219,7 +219,7 @@ class FtpClient extends Thread implements Closeable {
 
             this.closeDataConnection();
         } catch (IOException ignored) {} finally {
-            AthenaFtpServer.openPorts.add(this.dataPort);
+            AthenaFtpService.openPorts.add(this.dataPort);
             this.logger.debug("Connection closed.");
         }
     }

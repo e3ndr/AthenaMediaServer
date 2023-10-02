@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.service.simple_ui;
+package xyz.e3ndr.athena.service.special;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -12,12 +12,12 @@ import xyz.e3ndr.athena.service.AthenaService;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
-public class AthenaSimpleUIServer implements AthenaService {
+public class AthenaSpecialService implements AthenaService {
 
     @Override
     public void init() {
         try {
-            int port = Athena.config.services.simpleUI.port;
+            int port = Athena.config.services.http.port;
 
             SoraFramework framework = new SoraLauncher()
                 .setPort(port)
@@ -34,9 +34,9 @@ public class AthenaSimpleUIServer implements AthenaService {
 
             framework.startHttpServer();
 
-            FastLogger.logStatic("Started http server on %d!", port);
+            FastLogger.logStatic("Started special server on %d!", port);
         } catch (Exception e) {
-            FastLogger.logStatic(LogLevel.SEVERE, "Unable to start http server:\n%s", e);
+            FastLogger.logStatic(LogLevel.SEVERE, "Unable to start special server:\n%s", e);
         }
     }
 
@@ -45,7 +45,7 @@ public class AthenaSimpleUIServer implements AthenaService {
         @Override
         public void onInit(Sora sora) {
             sora.addProvider(this, new MetaRoutes());
-            sora.addProvider(this, new UIRoutes());
+            sora.addProvider(this, new WiiMCRoutes());
             sora.addProvider(this, new InternalRoutes());
         }
 
@@ -64,12 +64,12 @@ public class AthenaSimpleUIServer implements AthenaService {
 
         @Override
         public @NonNull String getName() {
-            return "Athena Web UI";
+            return "Athena";
         }
 
         @Override
         public @NonNull String getId() {
-            return "athena-webui";
+            return "athena";
         }
 
     }
