@@ -4,10 +4,10 @@ import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
-import xyz.e3ndr.athena.service.http.StreamRoutes;
+import xyz.e3ndr.athena.service.MediaStreamRoutes;
 
 class InternalRoutes implements HttpProvider {
-    private StreamRoutes streamRoutes = new StreamRoutes();
+    private MediaStreamRoutes streamRoutes = new MediaStreamRoutes();
 
     @HttpEndpoint(uri = "/_internal/media/:mediaId/stream")
     public HttpResponse onStreamRAW(SoraHttpSession session) {

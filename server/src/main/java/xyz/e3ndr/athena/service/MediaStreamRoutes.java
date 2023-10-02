@@ -1,4 +1,4 @@
-package xyz.e3ndr.athena.service.http;
+package xyz.e3ndr.athena.service;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +21,8 @@ import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 
-// Shared with Web UI
-public class StreamRoutes implements HttpProvider {
+// Used by Http, Simple UI, & Special
+public class MediaStreamRoutes implements HttpProvider {
 
     private MediaSession startSession(Media media, Map<String, String> query) throws IOException {
         VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());

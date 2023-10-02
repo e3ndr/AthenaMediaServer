@@ -9,6 +9,7 @@ import co.casterlabs.sora.api.SoraPlugin;
 import lombok.NonNull;
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.service.AthenaService;
+import xyz.e3ndr.athena.service.MediaStreamRoutes;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -46,7 +47,7 @@ public class AthenaHttpService implements AthenaService {
         public void onInit(Sora sora) {
             sora.addProvider(this, new MetaRoutes());
             sora.addProvider(this, new MediaRoutes());
-            sora.addProvider(this, new StreamRoutes());
+            sora.addProvider(this, new MediaStreamRoutes());
             sora.addProvider(this, new SessionRoutes());
             sora.addProvider(this, new IngestApiRoutes());
         }
