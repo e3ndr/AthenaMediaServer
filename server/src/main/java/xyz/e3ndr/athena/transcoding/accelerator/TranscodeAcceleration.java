@@ -7,7 +7,6 @@ import java.util.Scanner;
 
 import org.jetbrains.annotations.Nullable;
 
-import co.casterlabs.commons.async.Promise;
 import lombok.NonNull;
 import xyz.e3ndr.athena.transcoding.CommandBuilder;
 import xyz.e3ndr.athena.transcoding.Transcoder;
@@ -44,26 +43,11 @@ public enum TranscodeAcceleration {
         }
     }
 
-    @SuppressWarnings({
-            "unchecked",
-            "rawtypes"
-    })
     public static void runTests() {
-        List<Promise<?>> promises = new LinkedList<>();
         for (TranscodeAcceleration a : values()) {
             for (VideoCodec codec : VideoCodec.values()) {
-                promises.add(
-                    new Promise(() -> {
-                        a.tryCodec(codec);
-                        return null;
-                    })
-                );
+                a.tryCodec(codec);
             }
-        }
-        for (Promise<?> p : promises) {
-            try {
-                p.await();
-            } catch (Throwable ignored) {}
         }
     }
 
