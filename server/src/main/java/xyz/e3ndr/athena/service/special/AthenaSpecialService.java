@@ -44,9 +44,9 @@ public class AthenaSpecialService implements AthenaService {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addProvider(this, new MetaRoutes());
             sora.addProvider(this, new WiiMCRoutes());
             sora.addProvider(this, new InternalRoutes());
+            sora.addProvider(this, new MetaRoutes());
         }
 
         @Override

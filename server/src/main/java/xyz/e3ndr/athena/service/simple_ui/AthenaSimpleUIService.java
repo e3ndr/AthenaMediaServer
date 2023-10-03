@@ -44,9 +44,9 @@ public class AthenaSimpleUIService implements AthenaService {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addProvider(this, new MetaRoutes());
             sora.addProvider(this, new UIRoutes());
             sora.addProvider(this, new InternalRoutes());
+            sora.addProvider(this, new MetaRoutes());
         }
 
         @Override

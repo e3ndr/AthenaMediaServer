@@ -45,11 +45,11 @@ public class AthenaHttpService implements AthenaService {
 
         @Override
         public void onInit(Sora sora) {
-            sora.addProvider(this, new MetaRoutes());
             sora.addProvider(this, new MediaRoutes());
             sora.addProvider(this, new MediaStreamRoutes());
             sora.addProvider(this, new SessionRoutes());
             sora.addProvider(this, new IngestApiRoutes());
+            sora.addProvider(this, new MetaRoutes());
         }
 
         @Override
