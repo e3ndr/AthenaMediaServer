@@ -3,6 +3,7 @@ package xyz.e3ndr.athena;
 import co.casterlabs.rakurai.json.annotating.JsonClass;
 import co.casterlabs.rakurai.json.annotating.JsonField;
 import lombok.ToString;
+import xyz.e3ndr.athena.transcoding.accelerator.TranscodeAcceleration;
 
 @ToString
 @JsonClass(exposeAll = true)
@@ -67,14 +68,6 @@ public class Config {
     public static class TranscodeConfig {
         public boolean enable = true;
         public TranscodeAcceleration acceleration = TranscodeAcceleration.SOFTWARE_ONLY;
-
-        public static enum TranscodeAcceleration {
-            SOFTWARE_ONLY,
-            NVIDIA_PREFERRED,
-            // TODO AMD & Intel encoders.
-            // TODO Implement hardware decoding to speed up the transcode pipeline.
-            // https://trac.ffmpeg.org/wiki/HWAccelIntro
-        }
     }
 
 }

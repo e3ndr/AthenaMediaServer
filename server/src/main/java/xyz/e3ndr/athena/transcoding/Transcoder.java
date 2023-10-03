@@ -46,57 +46,51 @@ public class Transcoder {
             return null;
         }
 
-        List<String> command = new LinkedList<>();
+        CommandBuilder command = new CommandBuilder();
         command.add(FFMPEG_EXEC);
         command.add("-hide_banner");
-//      command.add("-v");
-//      command.add("error");
+//      command.add("-v", "error");
+
+        command.add(FFMpegArgs.acc_getFF());
 
         /* ---- Streams/Input ---- */
         for (int streamId : streamIds) {
-            command.add("-i");
-            command.add(media.getStreamFile(streamId).getCanonicalPath());
+            command.add("-i", media.getStreamFile(streamId).getCanonicalPath());
         }
 
         /* ---- Audio ---- */
-        command.addAll(FFMpegArgs.a_getFF(desiredACodec));
+        command.add(FFMpegArgs.a_getFF(desiredACodec));
 
         if (desiredACodec != AudioCodec.SOURCE) {
-            command.add("-ar");
-            command.add("48000");
+            command.add("-ar", "48000");
         }
 
         /* ---- Video ---- */
-        command.addAll(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality, Athena.config.transcoding.acceleration));
+        command.add(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality));
 
         if (desiredVCodec != VideoCodec.SOURCE) {
-            command.add("-b:v");
-            command.add(String.format("%dK", desiredQuality.bitrate));
+            command.add("-b:v", String.format("%dK", desiredQuality.bitrate));
 
             // https://trac.ffmpeg.org/wiki/Scaling
-            command.add("-vf");
-            command.add(String.format("scale='min(%d,iw)':-1, pad=ceil(iw/2)*2:ceil(ih/2)*2", desiredQuality.max));
+            command.add("-vf", String.format("scale='min(%d,iw)':-1, pad=ceil(iw/2)*2:ceil(ih/2)*2", desiredQuality.max));
         }
 
         /* ---- Format & Output ---- */
-        command.add("-bufsize");
-        command.add(String.valueOf(Athena.TRANSCODING_BUFFER_SIZE));
+        command.add("-bufsize", String.valueOf(Athena.TRANSCODING_BUFFER_SIZE));
 
-        command.addAll(desiredContainer.flags);
+        command.add(desiredContainer.flags);
 
         if (desiredContainer == ContainerFormat.HLS) {
             targetFile.mkdir(); // Make it a directory.
-            command.add("-vf");
-            command.add("fps=fps=" + HLS_RATE);
+            command.add("-vf", "fps=fps=" + HLS_RATE);
             command.add(new File(targetFile, "media.m3u8").getCanonicalPath());
         } else {
-            command.add("-f");
-            command.add(desiredContainer.ff);
+            command.add("-f", desiredContainer.ff);
             command.add("pipe:1");
         }
 
         final Process proc = new ProcessBuilder()
-            .command(command)
+            .command(command.asList())
             .redirectError(Redirect.PIPE)
             .redirectInput(Redirect.PIPE)
             .redirectOutput(Redirect.PIPE)
@@ -132,6 +126,7 @@ public class Transcoder {
                         session.processStatistic(line);
                         session.logger.debug(session);
                     } else if (initInfoBuilder != null) {
+                        session.logger.debug(line);
                         // This gets set to null after the video starts.
                         initInfoBuilder.add(line);
                     }

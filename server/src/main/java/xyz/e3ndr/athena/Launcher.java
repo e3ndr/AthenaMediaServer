@@ -10,6 +10,7 @@ import co.casterlabs.sora.SoraFramework;
 import xyz.e3ndr.athena.service.ftp.AthenaFtpService;
 import xyz.e3ndr.athena.service.http.AthenaHttpService;
 import xyz.e3ndr.athena.service.simple_ui.AthenaSimpleUIService;
+import xyz.e3ndr.athena.transcoding.accelerator.TranscodeAcceleration;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -45,6 +46,9 @@ public class Launcher {
 
         // debug
         FastLoggingFramework.setDefaultLevel(Athena.config.console.debug ? LogLevel.DEBUG : LogLevel.INFO);
+
+        // Wait for all of these to finish.
+        TranscodeAcceleration.runTests();
 
         // Go!
         if (Athena.config.services.http.enable) {

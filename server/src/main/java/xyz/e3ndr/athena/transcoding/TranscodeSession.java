@@ -87,7 +87,9 @@ public class TranscodeSession {
             String speedStr = ffmpegLine.split("speed= *")[1].split(" ")[0]; // "1.07x"
             speedStr = speedStr.substring(0, speedStr.length() - "x".length());
 
-            this.encodingSpeed = Double.parseDouble(speedStr);
+            if (!speedStr.startsWith("N/")) {
+                this.encodingSpeed = Double.parseDouble(speedStr);
+            }
         }
     }
 
