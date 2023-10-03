@@ -25,7 +25,7 @@ public class Launcher {
 
         if (args.length > 0) {
             if (args[0].equalsIgnoreCase("runtests")) {
-                FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
+//                FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
                 TranscodeAcceleration.runTests();
                 return;
             }

@@ -9,50 +9,46 @@ import lombok.NonNull;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 
-class SoftwareOnly implements Accelerator {
+class VaapiPreferred implements Accelerator {
+    private static final String VAAPI_DEVICE = System.getProperty("athena.vaapi.device", "/dev/dru/renderD128");
 
     @Override
     public @Nullable List<String> v_getFF(@NonNull VideoCodec codec, @NonNull VideoQuality quality) {
         switch (codec) {
-            case SOURCE:
-                return Arrays.asList(
-                    "-c:v", "copy"
-                );
-
             case H264_BASELINE:
                 return Arrays.asList(
-                    "-c:v", "libx264",
+                    "-vaapi_device", VAAPI_DEVICE,
+                    "-c:v", "h264_vaapi",
                     "-profile:v", "baseline",
                     "-pix_fmt", "yuv420p"
                 );
 
             case H264_HIGH:
                 return Arrays.asList(
-                    "-c:v", "libx264",
+                    "-vaapi_device", VAAPI_DEVICE,
+                    "-c:v", "h264_vaapi",
                     "-profile:v", "high",
                     "-pix_fmt", "yuv420p",
                     "-level", "5.0",
-                    "-tune", "film",
                     "-preset", "slow"
                 );
 
             // TODO the more advanced parameters for HEVC and AV1
             case HEVC:
                 return Arrays.asList(
-                    "-c:v", "libx265"
+                    "-vaapi_device", VAAPI_DEVICE,
+                    "-c:v", "hevc_vaapi"
                 );
 
             case AV1:
                 return Arrays.asList(
-                    "-c:v", "libsvtav1"
+                    "-vaapi_device", VAAPI_DEVICE,
+                    "-c:v", "av1_vaapi"
                 );
 
-            case SPARK:
-                return Arrays.asList(
-                    "-c:v", "flv1"
-                );
+            default:
+                return null;
         }
-        throw new IllegalArgumentException("Unhandled enum: " + codec);
     }
 
 }

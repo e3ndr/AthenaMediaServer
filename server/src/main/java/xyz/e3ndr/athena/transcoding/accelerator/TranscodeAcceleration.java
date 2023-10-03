@@ -18,6 +18,10 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 public enum TranscodeAcceleration {
     SOFTWARE_ONLY(new SoftwareOnly()),
     NVIDIA_PREFERRED(new NvidiaPreferred()),
+    AMD_PREFERRED(new AmdPreferred()),
+    QUICKSYNC_PREFERRED(new QuickSyncPreferred()),
+    VAAPI_PREFERRED(new VaapiPreferred()),
+    V$L_PREFERRED(new V4lPreferred()),
     // TODO AMD & Intel encoders.
     // TODO Implement hardware decoding to speed up the transcode pipeline.
     // https://trac.ffmpeg.org/wiki/HWAccelIntro
@@ -29,10 +33,6 @@ public enum TranscodeAcceleration {
 
     private TranscodeAcceleration(@NonNull Accelerator instance) {
         this.instance = instance;
-    }
-
-    public @Nullable List<String> acc_getFF() {
-        return this.instance.acc_getFF();
     }
 
     public @Nullable List<String> v_getFF(@NonNull VideoCodec codec, @NonNull VideoQuality quality) {

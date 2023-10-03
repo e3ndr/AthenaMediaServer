@@ -10,8 +10,6 @@ import xyz.e3ndr.athena.types.VideoQuality;
 
 public interface Accelerator {
 
-    public @Nullable List<String> acc_getFF();
-
     public @Nullable List<String> v_getFF(@NonNull VideoCodec codec, @NonNull VideoQuality quality);
 
 }

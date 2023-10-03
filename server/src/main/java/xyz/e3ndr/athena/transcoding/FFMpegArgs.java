@@ -14,8 +14,7 @@ import xyz.e3ndr.athena.types.VideoQuality;
 public class FFMpegArgs {
 
     public static @NonNull List<String> acc_getFF() {
-        List<String> args = Athena.config.transcoding.acceleration.acc_getFF();
-        return args == null ? Collections.emptyList() : args;
+        return Collections.emptyList();
     }
 
     public static @NonNull List<String> a_getFF(@NonNull AudioCodec codec) {

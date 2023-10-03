@@ -9,50 +9,41 @@ import lombok.NonNull;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 
-class SoftwareOnly implements Accelerator {
+class V4lPreferred implements Accelerator {
 
     @Override
     public @Nullable List<String> v_getFF(@NonNull VideoCodec codec, @NonNull VideoQuality quality) {
         switch (codec) {
-            case SOURCE:
-                return Arrays.asList(
-                    "-c:v", "copy"
-                );
-
             case H264_BASELINE:
                 return Arrays.asList(
-                    "-c:v", "libx264",
+                    "-c:v", "h264_v4l2m2m",
                     "-profile:v", "baseline",
                     "-pix_fmt", "yuv420p"
                 );
 
             case H264_HIGH:
                 return Arrays.asList(
-                    "-c:v", "libx264",
+                    "-c:v", "h264_v4l2m2m",
                     "-profile:v", "high",
                     "-pix_fmt", "yuv420p",
                     "-level", "5.0",
-                    "-tune", "film",
                     "-preset", "slow"
                 );
 
             // TODO the more advanced parameters for HEVC and AV1
             case HEVC:
                 return Arrays.asList(
-                    "-c:v", "libx265"
+                    "-c:v", "hevc_v4l2m2m"
                 );
 
             case AV1:
                 return Arrays.asList(
-                    "-c:v", "libsvtav1"
+                    "-c:v", "av1_v4l2m2m"
                 );
 
-            case SPARK:
-                return Arrays.asList(
-                    "-c:v", "flv1"
-                );
+            default:
+                return null;
         }
-        throw new IllegalArgumentException("Unhandled enum: " + codec);
     }
 
 }

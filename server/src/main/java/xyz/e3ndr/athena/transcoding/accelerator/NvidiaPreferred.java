@@ -12,15 +12,6 @@ import xyz.e3ndr.athena.types.VideoQuality;
 class NvidiaPreferred implements Accelerator {
 
     @Override
-    public @Nullable List<String> acc_getFF() {
-        return null; // TODO some good logic for this so we can accelerate decoding.
-//        return Arrays.asList(
-//            "-hwaccel", "cuda",
-//            "-hwaccel_output_format", "cuda"
-//        );
-    }
-
-    @Override
     public @Nullable List<String> v_getFF(@NonNull VideoCodec codec, @NonNull VideoQuality quality) {
         switch (codec) {
             case H264_BASELINE:
