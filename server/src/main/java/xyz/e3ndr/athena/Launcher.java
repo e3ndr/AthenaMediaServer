@@ -23,6 +23,14 @@ public class Launcher {
     public static void main(String[] args) throws Exception {
         ClassLoader.getPlatformClassLoader().setDefaultAssertionStatus(true);
 
+        if (args.length > 0) {
+            if (args[0].equalsIgnoreCase("runtests")) {
+                FastLoggingFramework.setDefaultLevel(LogLevel.DEBUG);
+                TranscodeAcceleration.runTests();
+                return;
+            }
+        }
+
         // Some pre-init.
         SoraFramework.LOGGER.setCurrentLevel(LogLevel.WARNING);
 
