@@ -473,8 +473,8 @@ class UIRoutes implements HttpProvider {
 //            );
 //        } else {
         ContainerFormat container = ContainerFormat.MKV;
-        VideoCodec vCodec = VideoCodec.SOURCE;
-        AudioCodec aCodec = AudioCodec.SOURCE;
+        VideoCodec vCodec = VideoCodec.H264_HIGH;
+        AudioCodec aCodec = AudioCodec.OPUS;
         VideoQuality quality = VideoQuality.UHD;
 
         if (userAgent.contains("Nintendo WiiU")) {
