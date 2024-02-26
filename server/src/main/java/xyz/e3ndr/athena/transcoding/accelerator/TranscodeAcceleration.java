@@ -21,7 +21,7 @@ public enum TranscodeAcceleration {
     AMD_PREFERRED(new AmdPreferred()),
     QUICKSYNC_PREFERRED(new QuickSyncPreferred()),
     VAAPI_PREFERRED(new VaapiPreferred()),
-    V$L_PREFERRED(new V4lPreferred()),
+    V4L_PREFERRED(new V4lPreferred()),
     // TODO AMD & Intel encoders.
     // TODO Implement hardware decoding to speed up the transcode pipeline.
     // https://trac.ffmpeg.org/wiki/HWAccelIntro
