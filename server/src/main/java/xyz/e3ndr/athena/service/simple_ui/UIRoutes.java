@@ -423,6 +423,11 @@ class UIRoutes implements HttpProvider {
             vCodec = VideoCodec.H264_HIGH;
             aCodec = AudioCodec.AAC;
             quality = VideoQuality.FHD;
+        } else if (userAgent.contains("Safari/")) {
+            container = ContainerFormat.HLS;
+            vCodec = VideoCodec.H264_HIGH;
+            aCodec = AudioCodec.AAC;
+            quality = VideoQuality.UHD;
         } else {
             container = ContainerFormat.MKV;
             vCodec = VideoCodec.SOURCE;
@@ -529,11 +534,15 @@ class UIRoutes implements HttpProvider {
         AudioCodec aCodec = AudioCodec.valueOf(session.getQueryParameters().get("aCodec"));
         VideoQuality quality = VideoQuality.valueOf(session.getQueryParameters().get("quality"));
 
-        String videoUrl = String.format(
-            "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
-            media.getId(), container, vCodec, aCodec, quality
-        );
-//        }
+        String videoUrl = container == ContainerFormat.HLS ? //
+            String.format(
+                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, quality
+            )
+            : String.format(
+                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, quality
+            );
 
         return new HTMLBuilder()
             .f("<a href=\"/media/%s\">Go back</a>", media.getId())
