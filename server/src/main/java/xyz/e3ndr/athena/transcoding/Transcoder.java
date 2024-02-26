@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +39,35 @@ public class Transcoder {
     public static final int HLS_INTERVAL = 10;
 
     private static final FastLogger logger = new FastLogger();
+
+    static {
+        if (Athena.config.transcoding.cacheRetentionHours != -1) {
+            AsyncTask.create(() -> {
+                while (true) {
+                    for (File file : Athena.cacheDirectory.listFiles()) {
+                        if (file.getName().endsWith(".lastaccess")) continue;
+
+                        try {
+                            File lastAccessFile = new File(file.getCanonicalPath() + ".lastaccess");
+                            long lastAccess = Long.parseLong(Files.readString(lastAccessFile.toPath()));
+
+                            if (System.currentTimeMillis() - lastAccess < TimeUnit.HOURS.toMillis(Athena.config.transcoding.cacheRetentionHours)) {
+                                continue; // Not expired!
+                            }
+
+                            if (file.delete()) {
+                                lastAccessFile.delete();
+                                logger.info("Successfully deleted %s from the transcode cache.", file);
+                            }
+                        } catch (NumberFormatException | IOException ignored) {}
+                    }
+                    try {
+                        TimeUnit.MINUTES.sleep(5);
+                    } catch (InterruptedException e) {}
+                }
+            });
+        }
+    }
 
     @SneakyThrows
     public static @Nullable TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {

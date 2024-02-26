@@ -68,6 +68,7 @@ public class Config {
     public static class TranscodeConfig {
         public boolean enable = true;
         public TranscodeAcceleration acceleration = TranscodeAcceleration.SOFTWARE_ONLY;
+        public @JsonField("cache_rentention_h") int cacheRetentionHours = 36;
     }
 
 }
