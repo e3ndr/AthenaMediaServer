@@ -2,6 +2,7 @@ package xyz.e3ndr.athena.service.simple_ui;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -471,7 +472,7 @@ class UIRoutes implements HttpProvider {
             }
         }
 
-        return new HTMLBuilder()
+        HTMLBuilder html = new HTMLBuilder()
             .f("<a href=\"/media\">Go back</a>")
             .f("<br />")
             .f("<br />")
@@ -513,12 +514,19 @@ class UIRoutes implements HttpProvider {
             .f("          <select name=\"vCodec\">" + vCodecOptions + "</select>")
             .f("          <select name=\"aCodec\">" + aCodecOptions + "</select>")
             .f("          <select name=\"quality\">" + qualityOptions + "</select>")
-            .f("          <button type=\"submit\">Watch</button>")
-            .f("      </form>")
+            .f("          <button type=\"submit\">Watch</button>");
+
+        // Add VLC deeplinks on mobile devices.
+        if (userAgent.contains("iPhone") /*|| userAgent.contains("Android")*/) {
+            html.f("          <button type=\"submit\" formaction=\"./%s/watch/vlc-deeplink\">Open in VLC</button>", media.getId());
+        }
+
+        html.f("      </form>")
             .f("    </td>")
             .f("  </tr>")
-            .f("</table>")
-            .toResponse(StandardHttpStatus.OK);
+            .f("</table>");
+
+        return html.toResponse(StandardHttpStatus.OK);
     }
 
     @HttpEndpoint(uri = "/media/:mediaId/watch")
@@ -550,6 +558,42 @@ class UIRoutes implements HttpProvider {
             .f("<br />")
             .f("<video src=\"%s\" controls fullscreen style=\"width: 100%%; height: 100%%;\" />", videoUrl)
             .toResponse(StandardHttpStatus.OK);
+    }
+
+    @SuppressWarnings("deprecation")
+    @HttpEndpoint(uri = "/media/:mediaId/watch/vlc-deeplink")
+    public HttpResponse onWatchSpecificMediaInVLCDeepLink(SoraHttpSession session) {
+        Media media = Athena.getMedia(session.getUriParameters().get("mediaId"));
+
+        if (media == null) {
+            return HttpResponse.newFixedLengthResponse(StandardHttpStatus.NOT_FOUND);
+        }
+
+        ContainerFormat container = ContainerFormat.MKV;// ContainerFormat.valueOf(session.getQueryParameters().get("container"));
+        VideoCodec vCodec = VideoCodec.valueOf(session.getQueryParameters().get("vCodec"));
+        AudioCodec aCodec = AudioCodec.valueOf(session.getQueryParameters().get("aCodec"));
+        VideoQuality quality = VideoQuality.valueOf(session.getQueryParameters().get("quality"));
+
+        String videoUrl = container == ContainerFormat.HLS ? //
+            String.format(
+                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, quality
+            )
+            : String.format(
+                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, quality
+            );
+
+        videoUrl = session.getHeader("Referer").substring(0, session.getHeader("Referer").indexOf("/media")) + videoUrl;
+
+        String userAgent = session.getHeader("User-Agent");
+        if (userAgent.contains("iPhone")) {
+            return HttpResponse
+                .newFixedLengthResponse(StandardHttpStatus.TEMPORARY_REDIRECT)
+                .putHeader("Location", "vlc-x-callback://x-callback-url/stream?url=" + URLEncoder.encode(videoUrl));
+        } else {
+            return HttpResponse.newFixedLengthResponse(StandardHttpStatus.NOT_IMPLEMENTED);
+        }
     }
 
 }
