@@ -423,7 +423,7 @@ class UIRoutes implements HttpProvider {
             vCodec = VideoCodec.H264_HIGH;
             aCodec = AudioCodec.AAC;
             quality = VideoQuality.FHD;
-        } else if (userAgent.contains("Safari/")) {
+        } else if (userAgent.contains("iPhone")) {
             container = ContainerFormat.HLS;
             vCodec = VideoCodec.H264_HIGH;
             aCodec = AudioCodec.AAC;
