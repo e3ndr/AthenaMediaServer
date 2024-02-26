@@ -407,6 +407,65 @@ class UIRoutes implements HttpProvider {
         String directors = String.join(", ", media.getInfo().getDirectors().stream().map((p) -> p.getName()).collect(Collectors.toList()));
         String actors = String.join(", ", media.getInfo().getActors().stream().limit(4).map((p) -> p.getName()).collect(Collectors.toList()));
 
+        ContainerFormat container = null;
+        VideoCodec vCodec = null;
+        AudioCodec aCodec = null;
+        VideoQuality quality = null;
+
+        String userAgent = session.getHeader("User-Agent");
+        if (userAgent.contains("Nintendo WiiU")) {
+            container = ContainerFormat.TS;
+            vCodec = VideoCodec.H264_BASELINE;
+            aCodec = AudioCodec.AAC;
+            quality = VideoQuality.FHD;
+        } else if (userAgent.contains("Windows Phone") || userAgent.contains("Trident/")) {
+            container = ContainerFormat.MP4;
+            vCodec = VideoCodec.H264_HIGH;
+            aCodec = AudioCodec.AAC;
+            quality = VideoQuality.FHD;
+        } else {
+            container = ContainerFormat.MKV;
+            vCodec = VideoCodec.SOURCE;
+            aCodec = AudioCodec.SOURCE;
+            quality = VideoQuality.UHD;
+        }
+
+        String containerOptions = "";
+        for (ContainerFormat e : ContainerFormat.values()) {
+            if (e == container) {
+                containerOptions += "<option selected>" + e + "</option>";
+            } else {
+                containerOptions += "<option>" + e + "</option>";
+            }
+        }
+
+        String vCodecOptions = "";
+        for (VideoCodec e : VideoCodec.values()) {
+            if (e == vCodec) {
+                vCodecOptions += "<option selected>" + e + "</option>";
+            } else {
+                vCodecOptions += "<option>" + e + "</option>";
+            }
+        }
+
+        String aCodecOptions = "";
+        for (AudioCodec e : AudioCodec.values()) {
+            if (e == aCodec) {
+                aCodecOptions += "<option selected>" + e + "</option>";
+            } else {
+                aCodecOptions += "<option>" + e + "</option>";
+            }
+        }
+
+        String qualityOptions = "";
+        for (VideoQuality e : VideoQuality.values()) {
+            if (e == quality) {
+                qualityOptions += "<option selected>" + e + "</option>";
+            } else {
+                qualityOptions += "<option>" + e + "</option>";
+            }
+        }
+
         return new HTMLBuilder()
             .f("<a href=\"/media\">Go back</a>")
             .f("<br />")
@@ -444,7 +503,13 @@ class UIRoutes implements HttpProvider {
             .f("      </table>")
             .f("")
             .f("      <br />")
-            .f("      <a href=\"/media/%s/watch\">Watch</a>", media.getId())
+            .f("      <form action=\"./%s/watch\" method=\"GET\">", media.getId())
+            .f("          <select name=\"container\">" + containerOptions + "</select>")
+            .f("          <select name=\"vCodec\">" + vCodecOptions + "</select>")
+            .f("          <select name=\"aCodec\">" + aCodecOptions + "</select>")
+            .f("          <select name=\"quality\">" + qualityOptions + "</select>")
+            .f("          <button type=\"submit\">Watch</button>")
+            .f("      </form>")
             .f("    </td>")
             .f("  </tr>")
             .f("</table>")
@@ -459,37 +524,12 @@ class UIRoutes implements HttpProvider {
             return HttpResponse.newFixedLengthResponse(StandardHttpStatus.NOT_FOUND);
         }
 
-        String videoUrl;
+        ContainerFormat container = ContainerFormat.valueOf(session.getQueryParameters().get("container"));
+        VideoCodec vCodec = VideoCodec.valueOf(session.getQueryParameters().get("vCodec"));
+        AudioCodec aCodec = AudioCodec.valueOf(session.getQueryParameters().get("aCodec"));
+        VideoQuality quality = VideoQuality.valueOf(session.getQueryParameters().get("quality"));
 
-        String userAgent = session.getHeader("User-Agent");
-//        if (userAgent.contains("Nintendo WiiU")) {
-//            VideoCodec vCodec = VideoCodec.H264_BASELINE;
-//            AudioCodec aCodec = AudioCodec.AAC;
-//            VideoQuality quality = VideoQuality.FHD;
-//
-//            videoUrl = String.format(
-//                "/_internal/media/%s/stream/hls/media.m3u8?videoCodec=%s&audioCodec=%s&quality=%s",
-//                media.getId(), vCodec, aCodec, quality
-//            );
-//        } else {
-        ContainerFormat container = ContainerFormat.MKV;
-        VideoCodec vCodec = VideoCodec.H264_HIGH;
-        AudioCodec aCodec = AudioCodec.OPUS;
-        VideoQuality quality = VideoQuality.UHD;
-
-        if (userAgent.contains("Nintendo WiiU")) {
-            container = ContainerFormat.TS;
-            vCodec = VideoCodec.H264_BASELINE;
-            aCodec = AudioCodec.AAC;
-            quality = VideoQuality.FHD;
-        } else if (userAgent.contains("Windows Phone") || userAgent.contains("Trident/")) {
-            container = ContainerFormat.MP4;
-            vCodec = VideoCodec.H264_HIGH;
-            aCodec = AudioCodec.AAC;
-            quality = VideoQuality.FHD;
-        }
-
-        videoUrl = String.format(
+        String videoUrl = String.format(
             "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
             media.getId(), container, vCodec, aCodec, quality
         );
