@@ -9,7 +9,7 @@ Cool little media server, WIP :^)
 - Can transcode to a wide variety of formats.
 - Fast and light-weight.
 - Can stream media over FTP or HTTP, with transcoding enabled on both.
-- Supports CUDA/NVENC acceleration.
+- Supports CUDA/NVENC/QuickSync/v4lm2m acceleration.
 - Supports WiiMC.
 
 ### WiiMC
