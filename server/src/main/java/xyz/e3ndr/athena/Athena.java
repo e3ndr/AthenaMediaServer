@@ -244,6 +244,11 @@ public class Athena {
     /* -------------------- */
 
     public static @Nullable MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
+        if (desiredVCodec == VideoCodec.SOURCE) {
+            desiredQuality = VideoQuality.UHD; // Doesn't really matter what we pick here. We just want to reduce duplicate
+                                               // transcodes, and this is part of the id.
+        }
+
         final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
         TranscodeSession transcodeSession = null;
 
