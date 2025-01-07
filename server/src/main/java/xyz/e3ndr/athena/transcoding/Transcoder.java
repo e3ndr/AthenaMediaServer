@@ -85,8 +85,10 @@ public class Transcoder {
         command.add(FFMpegArgs.acc_getFF());
 
         /* ---- Streams/Input ---- */
+        command.add("-i", new File(media.getFiles().getStreams().getFilePath()).getCanonicalPath());
+
         for (int streamId : streamIds) {
-            command.add("-i", media.getStreamFile(streamId).getCanonicalPath());
+            command.add("-map", String.format("0:%d", streamId));
         }
 
         /* ---- Audio ---- */
@@ -272,7 +274,7 @@ public class Transcoder {
             command.add("json");
 
             command.add("-i");
-            command.add(media.getStreamFile(streamIds[0]).getCanonicalPath()); // TODO TEMP, need to find the longer file.
+            command.add(new File(media.getFiles().getStreams().getFilePath()).getCanonicalPath());
 
             Process proc = new ProcessBuilder()
                 .command(command)

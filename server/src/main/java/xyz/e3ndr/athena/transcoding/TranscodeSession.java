@@ -66,8 +66,13 @@ public class TranscodeSession {
         }
 
         {
-            String sizeStr = ffmpegLine.split("size= *")[1].split(" ")[0]; // "177701kB"
-            sizeStr = sizeStr.substring(0, sizeStr.length() - "kB".length());
+            String sizeStr = ffmpegLine.split("size= *")[1].split(" ")[0]; // "177701kB" or "177701KiB"
+
+            if (sizeStr.endsWith("KiB")) {
+                sizeStr = sizeStr.substring(0, sizeStr.length() - "KiB".length());
+            } else {
+                sizeStr = sizeStr.substring(0, sizeStr.length() - "kB".length());
+            }
 
             this.bytesWritten = Long.parseLong(sizeStr) * 1000;
         }
