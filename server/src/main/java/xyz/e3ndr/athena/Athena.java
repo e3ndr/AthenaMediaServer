@@ -9,8 +9,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
@@ -19,6 +22,7 @@ import co.casterlabs.commons.io.streams.StreamUtil;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonObject;
+import lombok.SneakyThrows;
 import xyz.e3ndr.athena.transcoding.TranscodeSession;
 import xyz.e3ndr.athena.transcoding.Transcoder;
 import xyz.e3ndr.athena.types.AudioCodec;
@@ -189,9 +193,50 @@ public class Athena {
         }
     }
 
+    private static List<File> listRecursively(File dir) {
+        List<File> files = new LinkedList<>();
+        for (File file : dir.listFiles()) {
+            if (file.isDirectory()) {
+                files.addAll(listRecursively(file));
+            } else {
+                files.add(file);
+            }
+        }
+        return files;
+    }
+
+    @SneakyThrows
     public static List<String> listIngestables() {
         // TODO Cross reference with existing media to remove duplicates.
-        return Arrays.asList(new File(config.mediaDirectory).list());
+        List<File> found = listRecursively(new File(config.mediaDirectory));
+
+        Set<String> existing = listMedia(0, Integer.MAX_VALUE)
+            .stream()
+            .map((m) -> m.getFiles().getStreams().getFilePath())
+            .collect(Collectors.toCollection(HashSet::new));
+
+        Iterator<File> it = found.iterator();
+        while (it.hasNext()) {
+            File foundFile = it.next();
+
+            if (existing.contains(foundFile.getCanonicalPath())) {
+                it.remove();
+            }
+        }
+
+        int canonicalMediaDirectoryLength = new File(config.mediaDirectory).getCanonicalPath().length();
+
+        return found
+            .stream()
+            .map((f) -> {
+                try {
+                    return f.getCanonicalPath().substring(canonicalMediaDirectoryLength + 1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return "<error>"; // Shouldn't happen.
+                }
+            })
+            .collect(Collectors.toList());
     }
 
     /* -------------------- */
