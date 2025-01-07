@@ -64,7 +64,7 @@ public enum TranscodeAcceleration {
 
         List<String> vCodecArgs = this.instance.v_getFF(codec, VideoQuality.FHD);
         if (vCodecArgs == null) {
-            FastLogger.logStatic(LogLevel.DEBUG, "[Acceleration=%s] VideoCodec %s is NOT supported! (No args) This is probably fine...", this.name(), codec);
+            FastLogger.logStatic(LogLevel.TRACE, "[Acceleration=%s] VideoCodec %s is NOT supported! (No args) This is probably fine...", this.name(), codec);
             return;
         }
         command.add(vCodecArgs);
@@ -88,7 +88,7 @@ public enum TranscodeAcceleration {
 
                 try (Scanner output = new Scanner(proc.getErrorStream())) {
                     while (output.hasNext()) {
-                        FastLogger.logStatic(LogLevel.DEBUG, "[Acceleration=%s] %s", this.name(), output.nextLine());
+                        FastLogger.logStatic(LogLevel.TRACE, "[Acceleration=%s] %s", this.name(), output.nextLine());
                     }
                 }
             }
