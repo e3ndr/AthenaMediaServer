@@ -11,6 +11,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -171,6 +172,8 @@ public class Transcoder {
                         initInfoBuilder.add(line);
                     }
                 }
+            } catch (NoSuchElementException ignored) {
+                // Scanner throws this
             } catch (Throwable t) {
                 session.logger.fatal("Uncaught exception:\n%s", t);
             } finally {
