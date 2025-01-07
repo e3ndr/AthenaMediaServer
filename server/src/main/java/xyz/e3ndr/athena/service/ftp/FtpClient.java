@@ -12,7 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import co.casterlabs.commons.async.AsyncTask;
-import co.casterlabs.commons.async.PromiseWithHandles;
+import co.casterlabs.commons.async.promise.Promise;
+import co.casterlabs.commons.async.promise.PromiseResolver;
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.MediaSession;
 import xyz.e3ndr.athena.types.AudioCodec;
@@ -45,7 +46,7 @@ class FtpClient extends Thread implements Closeable {
     private ServerSocket dataSocket;
     private Socket dataConnection;
     private PrintWriter dataOutWriter;
-    private PromiseWithHandles<Void> dataConnectionPromise;
+    private PromiseResolver<Void> dataConnectionPromise;
 
     // state
     private TransferType transferMode = TransferType.ASCII;
@@ -271,7 +272,7 @@ class FtpClient extends Thread implements Closeable {
             this.dataSocket.close();
         }
 
-        this.dataConnectionPromise = new PromiseWithHandles<>();
+        this.dataConnectionPromise = Promise.withResolvers();
         this.dataSocket = new ServerSocket(port);
 
         this.logger.debug("Attempting to establish Passive Mode connection.");
@@ -294,7 +295,7 @@ class FtpClient extends Thread implements Closeable {
         try {
             this.dataConnection = new Socket(ipAddress, port);
             this.dataOutWriter = new PrintWriter(this.dataConnection.getOutputStream(), true);
-            this.dataConnectionPromise = new PromiseWithHandles<>();
+            this.dataConnectionPromise = Promise.withResolvers();
             this.dataConnectionPromise.resolve(null);
             this.logger.debug("Established Active Mode connection!");
         } catch (IOException e) {
@@ -352,9 +353,9 @@ class FtpClient extends Thread implements Closeable {
         }
 
         // Wait for the connection to complete.
-        if (!this.dataConnectionPromise.hasCompleted()) {
+        if (!this.dataConnectionPromise.promise.isSettled()) {
             try {
-                this.dataConnectionPromise.await();
+                this.dataConnectionPromise.promise.await();
             } catch (Throwable e) {}
         }
 

@@ -3,11 +3,11 @@ package xyz.e3ndr.athena.service.http;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import co.casterlabs.rakurai.io.http.HttpStatus;
-import co.casterlabs.rakurai.io.http.server.HttpResponse;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonElement;
 import co.casterlabs.rakurai.json.element.JsonObject;
+import co.casterlabs.rhs.protocol.HttpStatus;
+import co.casterlabs.rhs.server.HttpResponse;
 import lombok.NonNull;
 
 public class JsonResponse extends HttpResponse {

@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
-import co.casterlabs.rakurai.io.IOUtil;
+import co.casterlabs.commons.io.streams.StreamUtil;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonObject;
@@ -158,7 +158,7 @@ public class Athena {
                 .redirectOutput(Redirect.PIPE)
                 .start();
 
-            IOUtil.writeInputStreamToOutputStream(proc.getInputStream(), target, Athena.STREAMING_BUFFER_SIZE);
+            StreamUtil.streamTransfer(proc.getInputStream(), target, Athena.STREAMING_BUFFER_SIZE);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -180,7 +180,7 @@ public class Athena {
                 )
                 .start()
                 .getInputStream();
-            String mediaFileString = IOUtil.readInputStreamString(mediaFileStreams, StandardCharsets.UTF_8);
+            String mediaFileString = StreamUtil.toString(mediaFileStreams, StandardCharsets.UTF_8);
 
             return Rson.DEFAULT
                 .fromJson(mediaFileString, JsonObject.class)

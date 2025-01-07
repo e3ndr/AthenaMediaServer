@@ -86,9 +86,10 @@ public enum TranscodeAcceleration {
             } else {
                 FastLogger.logStatic(LogLevel.WARNING, "[Acceleration=%s] VideoCodec %s is NOT supported! This is probably fine...", this.name(), codec);
 
-                Scanner output = new Scanner(proc.getErrorStream());
-                while (output.hasNext()) {
-                    FastLogger.logStatic(LogLevel.DEBUG, "[Acceleration=%s] %s", this.name(), output.nextLine());
+                try (Scanner output = new Scanner(proc.getErrorStream())) {
+                    while (output.hasNext()) {
+                        FastLogger.logStatic(LogLevel.DEBUG, "[Acceleration=%s] %s", this.name(), output.nextLine());
+                    }
                 }
             }
         } catch (Exception e) {

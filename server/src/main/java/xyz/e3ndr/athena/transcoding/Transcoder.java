@@ -18,8 +18,9 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.Nullable;
 
 import co.casterlabs.commons.async.AsyncTask;
-import co.casterlabs.commons.async.PromiseWithHandles;
-import co.casterlabs.rakurai.io.IOUtil;
+import co.casterlabs.commons.async.promise.Promise;
+import co.casterlabs.commons.async.promise.PromiseResolver;
+import co.casterlabs.commons.io.streams.StreamUtil;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonObject;
 import lombok.SneakyThrows;
@@ -130,15 +131,14 @@ public class Transcoder {
 
         /* ---- Session & Analytics ---- */
         TranscodeSession session = new TranscodeSession(media.getId(), targetFile, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
-        PromiseWithHandles<Void> startPromise = new PromiseWithHandles<>();
+        PromiseResolver<Void> startPromise = Promise.withResolvers();
 
         Athena.transcodeSessions.add(session);
 
         AsyncTask.create(() -> {
-            Scanner stdout = new Scanner(proc.getErrorStream());
             boolean hasStarted = false;
 
-            try {
+            try (Scanner stdout = new Scanner(proc.getErrorStream())) {
                 List<String> initInfoBuilder = new LinkedList<>();
 
                 String line = null;
@@ -210,7 +210,7 @@ public class Transcoder {
             });
         }
 
-        startPromise.await(); // Wait for the session to start.
+        startPromise.promise.await(); // Wait for the session to start.
 
         return session;
     }
@@ -280,7 +280,7 @@ public class Transcoder {
                 .redirectInput(Redirect.PIPE)
                 .redirectOutput(Redirect.PIPE)
                 .start();
-            String json = IOUtil.readInputStreamString(proc.getInputStream(), StandardCharsets.UTF_8);
+            String json = StreamUtil.toString(proc.getInputStream(), StandardCharsets.UTF_8);
 
             JsonObject result = Rson.DEFAULT.fromJson(json, JsonObject.class);
             JsonObject format = result.getObject("format");

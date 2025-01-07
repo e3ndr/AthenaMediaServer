@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.unbescape.html.HtmlEscape;
 
-import co.casterlabs.rakurai.io.http.HttpStatus;
-import co.casterlabs.rakurai.io.http.server.HttpResponse;
+import co.casterlabs.rhs.protocol.HttpStatus;
+import co.casterlabs.rhs.server.HttpResponse;
 
 /**
  * This class is chainable.

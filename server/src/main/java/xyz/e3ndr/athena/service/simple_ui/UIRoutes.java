@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 
 import org.unbescape.uri.UriEscape;
 
-import co.casterlabs.rakurai.io.IOUtil;
-import co.casterlabs.rakurai.io.http.StandardHttpStatus;
-import co.casterlabs.rakurai.io.http.server.HttpResponse;
+import co.casterlabs.commons.io.streams.StreamUtil;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.TypeToken;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonElement;
 import co.casterlabs.rakurai.json.element.JsonObject;
+import co.casterlabs.rhs.protocol.StandardHttpStatus;
+import co.casterlabs.rhs.server.HttpResponse;
 import co.casterlabs.sora.api.http.HttpProvider;
 import co.casterlabs.sora.api.http.SoraHttpSession;
 import co.casterlabs.sora.api.http.annotations.HttpEndpoint;
@@ -40,13 +40,14 @@ import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 class UIRoutes implements HttpProvider {
     private static final String MEDIA_SEARCH_API = System.getProperty("athena.searchapi", "https://athenamediaserver-public-api.e3ndr.workers.dev/search?query=");
 
+    @SuppressWarnings("deprecation")
     @SneakyThrows
     private static List<Media> ingest_searchForMedia(String query) {
         URL url = new URL(MEDIA_SEARCH_API + UriEscape.escapeUriFragmentId(query));
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 
-        String result = IOUtil.readInputStreamString(conn.getInputStream(), StandardCharsets.UTF_8);
+        String result = StreamUtil.toString(conn.getInputStream(), StandardCharsets.UTF_8);
         JsonObject resultJson = Rson.DEFAULT.fromJson(result, JsonObject.class);
         return Rson.DEFAULT.fromJson(
             resultJson
