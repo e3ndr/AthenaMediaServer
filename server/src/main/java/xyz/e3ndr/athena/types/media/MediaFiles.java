@@ -16,7 +16,6 @@ import lombok.Setter;
 public class MediaFiles {
     private MediaFiles.Images images;
     private @Setter MediaFiles.Streams streams;
-    private @Setter List<MediaFiles.Subtitle> subtitles;
 
     @Getter
     @JsonClass(exposeAll = true)
@@ -37,6 +36,7 @@ public class MediaFiles {
 
         private List<VideoStream> video;
         private List<AudioStream> audio;
+        private List<SubtitleStream> subtitles;
 
         public List<Stream> getAll() {
             List<Stream> all = new ArrayList<>(this.video.size() + this.audio.size());
@@ -70,23 +70,21 @@ public class MediaFiles {
         @Setter
         @NonNull
         @JsonClass(exposeAll = true)
+        public static class SubtitleStream extends Stream {
+            private String language;
+
+        }
+
+        @Getter
+        @Setter
+        @NonNull
+        @JsonClass(exposeAll = true)
         public static abstract class Stream {
             private int id;
             private String name;
             private String codec;
 
         }
-
-    }
-
-    @Getter
-    @Setter
-    @NonNull
-    @JsonClass(exposeAll = true)
-    public static class Subtitle {
-        private String language;
-        private String file;
-        private List<String> forced;
 
     }
 

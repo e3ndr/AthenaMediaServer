@@ -17,6 +17,7 @@ import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.MediaSession;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
@@ -28,6 +29,7 @@ public class MediaStreamRoutes implements HttpProvider {
         VideoQuality videoQuality = VideoQuality.valueOf(query.getOrDefault("quality", VideoQuality.UHD.name()).toUpperCase());
         VideoCodec videoCodec = VideoCodec.valueOf(query.getOrDefault("videoCodec", VideoCodec.SOURCE.name()).toUpperCase());
         AudioCodec audioCodec = AudioCodec.valueOf(query.getOrDefault("audioCodec", AudioCodec.SOURCE.name()).toUpperCase());
+        SubtitleCodec subtitleCodec = SubtitleCodec.valueOf(query.getOrDefault("subtitleCodec", SubtitleCodec.SOURCE.name()).toUpperCase());
         ContainerFormat containerFormat = ContainerFormat.valueOf(query.getOrDefault("format", ContainerFormat.MKV.name()).toUpperCase());
 
         // Parse out the streamIds.
@@ -48,7 +50,7 @@ public class MediaStreamRoutes implements HttpProvider {
         return Athena.startStream(
             media,
             videoQuality,
-            videoCodec, audioCodec,
+            videoCodec, audioCodec, subtitleCodec,
             containerFormat,
             streamIds
         );

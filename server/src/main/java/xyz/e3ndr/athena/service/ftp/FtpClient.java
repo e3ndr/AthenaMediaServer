@@ -18,6 +18,7 @@ import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.MediaSession;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
@@ -625,7 +626,7 @@ class FtpClient extends Thread implements Closeable {
                 MediaSession session = Athena.startStream(
                     media,
                     this.videoQuality,
-                    this.videoCodec, this.audioCodec,
+                    this.videoCodec, this.audioCodec, SubtitleCodec.SOURCE,
                     this.containerFormat,
                     streamIds
                 );

@@ -27,6 +27,7 @@ import xyz.e3ndr.athena.transcoding.TranscodeSession;
 import xyz.e3ndr.athena.transcoding.Transcoder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
@@ -243,13 +244,13 @@ public class Athena {
     /* Media                */
     /* -------------------- */
 
-    public static @Nullable MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
+    public static @Nullable MediaSession startStream(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, SubtitleCodec desiredSCodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
         if (desiredVCodec == VideoCodec.SOURCE) {
             desiredQuality = VideoQuality.UHD; // Doesn't really matter what we pick here. We just want to reduce duplicate
                                                // transcodes, and this is part of the id.
         }
 
-        final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        final File cacheFile = Transcoder.getFile(media, desiredQuality, desiredVCodec, desiredACodec, desiredSCodec, desiredContainer, streamIds);
         TranscodeSession transcodeSession = null;
 
         if (cacheFile.exists()) {
@@ -261,11 +262,11 @@ public class Athena {
                 }
             }
         } else {
-            transcodeSession = Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+            transcodeSession = Transcoder.start(cacheFile, media, desiredQuality, desiredVCodec, desiredACodec, desiredSCodec, desiredContainer, streamIds);
             if (transcodeSession == null) return null; // Couldn't start transcode, check the logs.
         }
 
-        return new MediaSession(cacheFile, transcodeSession, media.getId(), desiredQuality, desiredVCodec, desiredACodec, desiredContainer, streamIds);
+        return new MediaSession(cacheFile, transcodeSession, media.getId(), desiredQuality, desiredVCodec, desiredACodec, desiredSCodec, desiredContainer, streamIds);
     }
 
     public static @Nullable Media getMedia(String mediaId) {

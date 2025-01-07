@@ -8,6 +8,7 @@ import lombok.NonNull;
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.transcoding.accelerator.TranscodeAcceleration;
 import xyz.e3ndr.athena.types.AudioCodec;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 
@@ -57,6 +58,12 @@ public class FFMpegArgs {
         }
 
         return args;
+    }
+
+    public static @NonNull List<String> s_getFF(SubtitleCodec desiredSCodec) {
+        return Arrays.asList(
+            "-c:s", desiredSCodec.ff
+        );
     }
 
 }

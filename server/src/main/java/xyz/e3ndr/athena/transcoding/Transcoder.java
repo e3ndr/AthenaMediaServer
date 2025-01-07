@@ -27,9 +27,11 @@ import lombok.SneakyThrows;
 import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams.SubtitleStream;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class Transcoder {
@@ -71,7 +73,7 @@ public class Transcoder {
     }
 
     @SneakyThrows
-    public static @Nullable TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+    public static @Nullable TranscodeSession start(File targetFile, Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, SubtitleCodec desiredSCodec, ContainerFormat desiredContainer, int... streamIds) {
         if (!Athena.config.transcoding.enable && (desiredACodec != AudioCodec.SOURCE || desiredVCodec != VideoCodec.SOURCE)) {
             logger.severe("Transcoding is disabled, but a session was requested.");
             return null;
@@ -92,12 +94,20 @@ public class Transcoder {
             command.add("-map", String.format("0:%d", streamId));
         }
 
+        // Include all subtitles that we support.
+        for (SubtitleStream subtitle : media.getFiles().getStreams().getSubtitles()) {
+            command.add("-map", String.format("0:%d", subtitle.getId()));
+        }
+
         /* ---- Audio ---- */
         command.add(FFMpegArgs.a_getFF(desiredACodec));
 
         if (desiredACodec != AudioCodec.SOURCE) {
             command.add("-ar", "48000");
         }
+
+        /* ---- Subtitles ---- */
+        command.add(FFMpegArgs.s_getFF(desiredSCodec));
 
         /* ---- Video ---- */
         command.add(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality));
@@ -228,7 +238,7 @@ public class Transcoder {
     }
 
     @SneakyThrows
-    public static File getFile(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) {
+    public static File getFile(Media media, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, SubtitleCodec desiredSCodec, ContainerFormat desiredContainer, int... streamIds) {
         List<String> str_streamIds = new ArrayList<>(streamIds.length);
         for (int streamId : streamIds) {
             str_streamIds.add(String.valueOf(streamId));
@@ -237,6 +247,7 @@ public class Transcoder {
         List<String> codecs = new ArrayList<>();
         codecs.add(desiredVCodec.name().toLowerCase());
         codecs.add(desiredACodec.name().toLowerCase());
+        codecs.add(desiredSCodec.name().toLowerCase());
 
         File mediaFile = new File(
             Athena.cacheDirectory,

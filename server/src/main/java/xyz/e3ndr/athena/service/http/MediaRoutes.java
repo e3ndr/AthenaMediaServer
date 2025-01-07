@@ -42,8 +42,8 @@ class MediaRoutes implements HttpProvider {
             Rson.DEFAULT.toJson(media),
             Map.of(
                 "list", "GET /api/media?start&limit",
-                "stream_raw", "GET /api/media/:mediaId/stream/raw?quality&videoCodec&audioCodec&format&skipTo",
-                "stream_hls", "GET /api/media/:mediaId/stream/hls?quality&videoCodec&audioCodec&format&skipTo"
+                "stream_raw", "GET /api/media/:mediaId/stream/raw?quality&videoCodec&audioCodec&subtitleCodec&format&skipTo",
+                "stream_hls", "GET /api/media/:mediaId/stream/hls?quality&videoCodec&audioCodec&subtitleCodec&format&skipTo"
             )
         )
             .putHeader("Access-Control-Allow-Origin", session.getHeaders().getOrDefault("Origin", Arrays.asList("*")).get(0));

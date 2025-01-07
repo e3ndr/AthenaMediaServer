@@ -19,6 +19,7 @@ import lombok.ToString;
 import xyz.e3ndr.athena.transcoding.TranscodeSession;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -38,6 +39,7 @@ public class MediaSession {
     private VideoQuality videoQuality;
     private VideoCodec videoCodec;
     private AudioCodec audioCodec;
+    private SubtitleCodec subtitleCodec;
     private ContainerFormat containerFormat;
     private int[] streamIds;
 
@@ -50,7 +52,7 @@ public class MediaSession {
     @Getter(AccessLevel.NONE)
     public final FastLogger logger = new FastLogger("Media Session: ".concat(this.id));
 
-    public MediaSession(File file, @Nullable TranscodeSession transcodeSession, String mediaId, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
+    public MediaSession(File file, @Nullable TranscodeSession transcodeSession, String mediaId, VideoQuality desiredQuality, VideoCodec desiredVCodec, AudioCodec desiredACodec, SubtitleCodec desiredSCodec, ContainerFormat desiredContainer, int... streamIds) throws IOException {
         this.file = file;
         this.transcodeSession = transcodeSession;
         this.isCached = this.transcodeSession == null;
@@ -58,6 +60,7 @@ public class MediaSession {
         this.videoQuality = desiredQuality;
         this.videoCodec = desiredVCodec;
         this.audioCodec = desiredACodec;
+        this.subtitleCodec = desiredSCodec;
         this.containerFormat = desiredContainer;
         this.streamIds = streamIds;
     }

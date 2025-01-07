@@ -28,11 +28,13 @@ import xyz.e3ndr.athena.Athena;
 import xyz.e3ndr.athena.service.HTMLBuilder;
 import xyz.e3ndr.athena.types.AudioCodec;
 import xyz.e3ndr.athena.types.ContainerFormat;
+import xyz.e3ndr.athena.types.SubtitleCodec;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams.AudioStream;
+import xyz.e3ndr.athena.types.media.MediaFiles.Streams.SubtitleStream;
 import xyz.e3ndr.athena.types.media.MediaFiles.Streams.VideoStream;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
@@ -246,6 +248,35 @@ class UIRoutes implements HttpProvider {
                     break;
                 }
 
+                case "subtitle": {
+                    String codecName = codec.getString("codec_name");
+
+                    try {
+                        SubtitleCodec.valueOf(codecName.toUpperCase());
+                    } catch (Exception ignored) {
+                        continue;
+                    }
+
+                    String language = "Unknown";
+                    String title = "Subtitle (" + codecName + ")";
+                    if (codec.containsKey("tags")) {
+                        JsonObject tags = codec.getObject("tags");
+                        if (tags.containsKey("language")) {
+                            language = tags.getString("language");
+                        }
+                        if (tags.containsKey("title")) {
+                            title = tags.getString("title");
+                        }
+                    }
+
+                    html
+                        .f("Name: <input type=\"input\" name=\"stream/%d/name\" value=\"%s\" />", codecIdx, title)
+                        .f("Language: <input type=\"input\" name=\"stream/%d/language\" value=\"%s\" />", codecIdx, language)
+                        .f("<input type=\"input\" name=\"stream/%d/codec\" value=\"%s\" style=\"display: none;\" />", codecIdx, codecName)
+                        .f("<input type=\"input\" name=\"stream/%d/type\" value=\"subtitle\" style=\"display: none;\" />", codecIdx);
+                    break;
+                }
+
                 // TODO others.
             }
             codecIdx++;
@@ -272,6 +303,7 @@ class UIRoutes implements HttpProvider {
         media.getFiles().setStreams(new Streams());
         media.getFiles().getStreams().setVideo(new LinkedList<>());
         media.getFiles().getStreams().setAudio(new LinkedList<>());
+        media.getFiles().getStreams().setSubtitles(new LinkedList<>());
 
         // defaultStream
         JsonArray defaultStreams = new JsonArray();
@@ -335,6 +367,16 @@ class UIRoutes implements HttpProvider {
                         .getAudio()
                         .add(
                             Rson.DEFAULT.fromJson(json, AudioStream.class)
+                        );
+                    break;
+
+                case "subtitle":
+                    media
+                        .getFiles()
+                        .getStreams()
+                        .getSubtitles()
+                        .add(
+                            Rson.DEFAULT.fromJson(json, SubtitleStream.class)
                         );
                     break;
             }
@@ -514,6 +556,7 @@ class UIRoutes implements HttpProvider {
             .f("          <select name=\"container\">" + containerOptions + "</select>")
             .f("          <select name=\"vCodec\">" + vCodecOptions + "</select>")
             .f("          <select name=\"aCodec\">" + aCodecOptions + "</select>")
+            .f("          <select name=\"sCodec\"><option selected>WEBVTT</option></select>")
             .f("          <select name=\"quality\">" + qualityOptions + "</select>")
             .f("          <button type=\"submit\">Watch</button>");
 
@@ -541,16 +584,17 @@ class UIRoutes implements HttpProvider {
         ContainerFormat container = ContainerFormat.valueOf(session.getQueryParameters().get("container"));
         VideoCodec vCodec = VideoCodec.valueOf(session.getQueryParameters().get("vCodec"));
         AudioCodec aCodec = AudioCodec.valueOf(session.getQueryParameters().get("aCodec"));
+        SubtitleCodec sCodec = SubtitleCodec.valueOf(session.getQueryParameters().get("sCodec"));
         VideoQuality quality = VideoQuality.valueOf(session.getQueryParameters().get("quality"));
 
         String videoUrl = container == ContainerFormat.HLS ? //
             String.format(
-                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
-                media.getId(), container, vCodec, aCodec, quality
+                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&subtitleCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, sCodec, quality
             )
             : String.format(
-                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
-                media.getId(), container, vCodec, aCodec, quality
+                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&subtitleCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, sCodec, quality
             );
 
         return new HTMLBuilder()
@@ -573,16 +617,17 @@ class UIRoutes implements HttpProvider {
         ContainerFormat container = ContainerFormat.MKV;// ContainerFormat.valueOf(session.getQueryParameters().get("container"));
         VideoCodec vCodec = VideoCodec.valueOf(session.getQueryParameters().get("vCodec"));
         AudioCodec aCodec = AudioCodec.valueOf(session.getQueryParameters().get("aCodec"));
+        SubtitleCodec sCodec = SubtitleCodec.valueOf(session.getQueryParameters().get("sCodec"));
         VideoQuality quality = VideoQuality.valueOf(session.getQueryParameters().get("quality"));
 
         String videoUrl = container == ContainerFormat.HLS ? //
             String.format(
-                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
-                media.getId(), container, vCodec, aCodec, quality
+                "/_internal/media/%s/stream/hls/media.m3u8?format=%s&videoCodec=%s&audioCodec=%s&subtitleCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, sCodec, quality
             )
             : String.format(
-                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&quality=%s",
-                media.getId(), container, vCodec, aCodec, quality
+                "/_internal/media/%s/stream?format=%s&videoCodec=%s&audioCodec=%s&subtitleCodec=%s&quality=%s",
+                media.getId(), container, vCodec, aCodec, sCodec, quality
             );
 
         videoUrl = session.getHeader("Referer").substring(0, session.getHeader("Referer").indexOf("/media")) + videoUrl;
