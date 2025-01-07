@@ -11,7 +11,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -81,6 +80,7 @@ public class Transcoder {
         command.add(FFMPEG_EXEC);
         command.add("-hide_banner");
 //      command.add("-v", "error");
+        command.add("-fflags", "+genpts");
 
         command.add(FFMpegArgs.acc_getFF());
 
@@ -137,12 +137,13 @@ public class Transcoder {
 
         Athena.transcodeSessions.add(session);
 
+        session.logger.debug("Command: \"%s\"", String.join("\" \"", command.asList()));
+
         AsyncTask.create(() -> {
             boolean hasStarted = false;
 
             try (Scanner stdout = new Scanner(proc.getErrorStream())) {
                 List<String> initInfoBuilder = new LinkedList<>();
-
                 String line = null;
                 while ((line = stdout.nextLine()) != null) {
                     session.logger.trace(line);
@@ -150,11 +151,12 @@ public class Transcoder {
                     if (line.startsWith("frame=")) {
                         if (!hasStarted) {
                             session.init(initInfoBuilder);
-                            initInfoBuilder = null;
                             hasStarted = true;
                             session.logger.debug("Started!");
                             session.logger.debug(initInfoBuilder);
                             startPromise.resolve(null);
+                            initInfoBuilder = null;
+                            session.logger.debug(line);
                         }
 
                         session.processStatistic(line);
@@ -165,9 +167,10 @@ public class Transcoder {
                         initInfoBuilder.add(line);
                     }
                 }
-            } catch (NoSuchElementException ignored) {
-                // Ignored.
+            } catch (Throwable t) {
+                session.logger.fatal("Uncaught exception:\n%s", t);
             } finally {
+                session.logger.debug("No more output");
                 if (!hasStarted) {
                     startPromise.resolve(null); // Just in case...
                 }
