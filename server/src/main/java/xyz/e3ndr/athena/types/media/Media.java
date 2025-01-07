@@ -29,13 +29,6 @@ public class Media {
         }
     }
 
-    public File getStreamFile(int streamId) {
-        return new File(
-            Athena.mediaDirectory,
-            String.format("%s/streams/%d.%s", this.id, streamId, Athena.STREAM_FORMAT)
-        );
-    }
-
     /**
      * a: The main subtitle file. (nullable)<br />
      * b: Any forced subtitles.
@@ -45,7 +38,7 @@ public class Media {
             if (!subtitle.getLanguage().equals(language)) continue;
 
             File mainSubtitle = new File(
-                Athena.mediaDirectory,
+                Athena.indexDirectory,
                 String.format("%s/subtitles/%s", this.id, subtitle.getFile())
             );
 
@@ -53,7 +46,7 @@ public class Media {
             for (String forced : subtitle.getForced()) {
                 forcedSubtitles.add(
                     new File(
-                        Athena.mediaDirectory,
+                        Athena.indexDirectory,
                         String.format("%s/subtitles/%s", this.id, forced)
                     )
                 );

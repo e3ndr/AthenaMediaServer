@@ -33,6 +33,8 @@ public class MediaFiles {
     public static class Streams {
         private int[] defaultStreams;
 
+        private String filePath;
+
         private List<VideoStream> video;
         private List<AudioStream> audio;
 

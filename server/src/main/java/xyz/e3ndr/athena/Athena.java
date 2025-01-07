@@ -26,7 +26,6 @@ import xyz.e3ndr.athena.types.ContainerFormat;
 import xyz.e3ndr.athena.types.VideoCodec;
 import xyz.e3ndr.athena.types.VideoQuality;
 import xyz.e3ndr.athena.types.media.Media;
-import xyz.e3ndr.athena.types.media.MediaFiles.Streams.Stream;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 import xyz.e3ndr.fastloggingframework.logging.LogLevel;
 
@@ -37,14 +36,12 @@ public class Athena {
     public static final int STREAMING_BUFFER_SIZE = 64/*kb*/ * 1000;
     public static final int TRANSCODING_BUFFER_SIZE = 512/*kb*/ * 1000;
 
-    public static final File mediaDirectory = new File("./Media");
+    public static final File indexDirectory = new File("./Index");
     public static final File cacheDirectory = new File("./Cache");
-    public static final File ingestDirectory = new File("./Ingest");
 
     static {
-        Athena.mediaDirectory.mkdirs();
+        Athena.indexDirectory.mkdirs();
         Athena.cacheDirectory.mkdirs();
-        Athena.ingestDirectory.mkdirs();
     }
 
     public static Config config = new Config();
@@ -65,14 +62,15 @@ public class Athena {
     /* -------------------- */
 
     public static void ingest(String fileName, Media media) throws IOException, InterruptedException {
-        File mediaFile = new File(ingestDirectory, fileName);
+        File mediaFile = new File(config.mediaDirectory, fileName);
+        media.getFiles().getStreams().setFilePath(mediaFile.getCanonicalPath());
 
-        File mediaIndexLocation = new File(mediaDirectory, media.getId());
-        File mediaStreamsLocation = new File(mediaIndexLocation, "streams");
+        File mediaIndexLocation = new File(indexDirectory, media.getId());
+//        File mediaStreamsLocation = new File(mediaIndexLocation, "streams");
         File mediaSubtitlesLocation = new File(mediaIndexLocation, "subtitles");
 
         mediaIndexLocation.mkdirs();
-        mediaStreamsLocation.mkdirs();
+//        mediaStreamsLocation.mkdirs();
         mediaSubtitlesLocation.mkdirs();
 
         Files.write(
@@ -83,49 +81,49 @@ public class Athena {
                 .getBytes(StandardCharsets.UTF_8)
         );
 
-        List<Process> processes = new LinkedList<>();
+//        List<Process> processes = new LinkedList<>();
+//
+//        // Start them all simultaneously.
+//        for (Stream stream : media.getFiles().getStreams().getAll()) {
+//            String streamId = String.valueOf(stream.getId());
+//            File streamFile = new File(mediaStreamsLocation, streamId.concat(".mkv"));
+//
+//            Process process = new ProcessBuilder()
+//                .command(
+//                    "ffmpeg",
+//                    "-hide_banner",
+//                    "-v", "error",
+//                    "-i", mediaFile.getCanonicalPath(),
+//                    "-map", "0:".concat(streamId),
+//                    "-c", "copy",
+//                    "-f", "matroska",
+//                    streamFile.getCanonicalPath()
+//                )
+//                .redirectInput(Redirect.PIPE)
+//                .redirectError(Redirect.INHERIT)
+//                .redirectOutput(Redirect.DISCARD)
+//                .start();
+//
+//            processes.add(process);
+//        }
+//
+//        // Wait for them to complete.
+//        for (Process process : processes) {
+//            process.waitFor();
+//        }
 
-        // Start them all simultaneously.
-        for (Stream stream : media.getFiles().getStreams().getAll()) {
-            String streamId = String.valueOf(stream.getId());
-            File streamFile = new File(mediaStreamsLocation, streamId.concat(".mkv"));
-
-            Process process = new ProcessBuilder()
-                .command(
-                    "ffmpeg",
-                    "-hide_banner",
-                    "-v", "error",
-                    "-i", mediaFile.getCanonicalPath(),
-                    "-map", "0:".concat(streamId),
-                    "-c", "copy",
-                    "-f", "matroska",
-                    streamFile.getCanonicalPath()
-                )
-                .redirectInput(Redirect.PIPE)
-                .redirectError(Redirect.INHERIT)
-                .redirectOutput(Redirect.DISCARD)
-                .start();
-
-            processes.add(process);
-        }
-
-        // Wait for them to complete.
-        for (Process process : processes) {
-            process.waitFor();
-        }
-
-        new File(Athena.ingestDirectory, "completed/").mkdir();
-        Files.move(
-            mediaFile.toPath(),
-            new File(Athena.ingestDirectory, "completed/" + mediaFile.getName()).toPath()
-        );
+//        new File(Athena.config.mediaDirectory, "completed/").mkdir();
+//        Files.move(
+//            mediaFile.toPath(),
+//            new File(Athena.config.mediaDirectory, "completed/" + mediaFile.getName()).toPath()
+//        );
     }
 
     public static void streamIngestable(String fileName, int streamId, OutputStream target) {
         Process proc = null;
 
         try {
-            File mediaFile = new File(ingestDirectory, fileName);
+            File mediaFile = new File(config.mediaDirectory, fileName);
 
             List<String> command = new LinkedList<>();
             command.add("ffmpeg");
@@ -168,7 +166,7 @@ public class Athena {
 
     public static JsonArray getIngestableInfo(String fileName) {
         try {
-            File mediaFile = new File(ingestDirectory, fileName);
+            File mediaFile = new File(config.mediaDirectory, fileName);
             InputStream mediaFileStreams = new ProcessBuilder()
                 .command(
                     "ffprobe",
@@ -192,7 +190,8 @@ public class Athena {
     }
 
     public static List<String> listIngestables() {
-        return Arrays.asList(ingestDirectory.list());
+        // TODO Cross reference with existing media to remove duplicates.
+        return Arrays.asList(new File(config.mediaDirectory).list());
     }
 
     /* -------------------- */
@@ -221,7 +220,7 @@ public class Athena {
 
     public static @Nullable Media getMedia(String mediaId) {
         try {
-            File mediaIndexFile = new File(mediaDirectory, mediaId.concat("/index.json"));
+            File mediaIndexFile = new File(indexDirectory, mediaId.concat("/index.json"));
             String mediaIndex = Files.readString(mediaIndexFile.toPath(), StandardCharsets.UTF_8);
 
             return Rson.DEFAULT.fromJson(mediaIndex, Media.class);
@@ -232,11 +231,11 @@ public class Athena {
     }
 
     public static int totalMedia() {
-        return mediaDirectory.list().length;
+        return indexDirectory.list().length;
     }
 
     public static List<Media> listMedia(int start, int limit) {
-        String[] fileList = mediaDirectory.list();
+        String[] fileList = indexDirectory.list();
         return Arrays.asList(fileList)
             .subList(start, Math.min(fileList.length, start + limit))
             .parallelStream()
@@ -255,7 +254,7 @@ public class Athena {
         }
 
         String $_query = query;
-        return Arrays.asList(mediaDirectory.list())
+        return Arrays.asList(indexDirectory.list())
             .parallelStream()
             .map(Athena::getMedia)
             .filter((mediaId) -> mediaId != null) // Remove empty results.

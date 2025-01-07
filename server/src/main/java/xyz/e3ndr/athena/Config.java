@@ -13,6 +13,9 @@ public class Config {
     public SessionConfig sessions = new SessionConfig();
     public TranscodeConfig transcoding = new TranscodeConfig();
 
+    @JsonField("media_directory")
+    public String mediaDirectory = "./Media";
+
     @ToString
     @JsonClass(exposeAll = true)
     public static class ConsoleConfig {
