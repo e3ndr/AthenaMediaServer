@@ -58,33 +58,35 @@ public class TranscodeSession {
 
         {
             String bitrateStr = ffmpegLine.split("bitrate= *")[1].split(" ")[0]; // "2429.2kbits/s"
-            if (bitrateStr.equals("N/A")) return; // Empty stat.
+            if (!bitrateStr.equals("N/A")) {
+                bitrateStr = bitrateStr.substring(0, bitrateStr.length() - "kbits/s".length());
 
-            bitrateStr = bitrateStr.substring(0, bitrateStr.length() - "kbits/s".length());
-
-            this.averageBitrate = (int) (Double.parseDouble(bitrateStr) * 1000);
+                this.averageBitrate = (int) (Double.parseDouble(bitrateStr) * 1000);
+            }
         }
 
         {
             String sizeStr = ffmpegLine.split("size= *")[1].split(" ")[0]; // "177701kB" or "177701KiB"
+            if (!sizeStr.equals("N/A")) {
+                if (sizeStr.endsWith("KiB")) {
+                    sizeStr = sizeStr.substring(0, sizeStr.length() - "KiB".length());
+                } else {
+                    sizeStr = sizeStr.substring(0, sizeStr.length() - "kB".length());
+                }
 
-            if (sizeStr.endsWith("KiB")) {
-                sizeStr = sizeStr.substring(0, sizeStr.length() - "KiB".length());
-            } else {
-                sizeStr = sizeStr.substring(0, sizeStr.length() - "kB".length());
+                this.bytesWritten = Long.parseLong(sizeStr) * 1000;
             }
-
-            this.bytesWritten = Long.parseLong(sizeStr) * 1000;
         }
 
         {
             String timeStr = ffmpegLine.split("time= *")[1].split(" ")[0]; // "00:09:59.26"
+            if (!timeStr.equals("N/A")) {
+                long currentTime = timestampToMillis(timeStr);
+                this.encodingProgress = (double) currentTime / this.duration;
 
-            long currentTime = timestampToMillis(timeStr);
-            this.encodingProgress = (double) currentTime / this.duration;
-
-            if (this.encodingProgress == 1) {
-                this.isComplete = true;
+                if (this.encodingProgress == 1) {
+                    this.isComplete = true;
+                }
             }
         }
 
@@ -165,13 +167,16 @@ public class TranscodeSession {
                     // Process it.
                     String sectionStart = currentSection.remove(0);
 
-                    if (sectionStart.startsWith("Output")) {
+                    if (sectionStart.toUpperCase().startsWith("INPUT") || sectionStart.toUpperCase().startsWith("OUTPUT")) {
                         for (String sectionEntry : currentSection) {
                             sectionEntry = sectionEntry.trim();
 
-                            if (sectionEntry.startsWith("DURATION")) {
+                            if (sectionEntry.toUpperCase().startsWith("DURATION")) {
                                 // "DURATION : 01:56:07.018000000"
-                                String durationStr = sectionEntry.substring(sectionEntry.indexOf(":") + 2); // "01:56:07.018000000"
+                                // "Duration: 01:56:07.02, start: 0.000000, bitrate: 2266 kb/s"
+
+                                String[] sectionParts = sectionEntry.split(",");
+                                String durationStr = sectionParts[0].substring(sectionParts[0].indexOf(":") + 2); // "01:56:07.018000000"
                                 long duration = timestampToMillis(durationStr);
 
                                 // Store the longest duration.

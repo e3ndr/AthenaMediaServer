@@ -115,7 +115,11 @@ public class Transcoder {
 
         if (desiredContainer == ContainerFormat.HLS) {
             targetFile.mkdir(); // Make it a directory.
-            command.add("-vf", "fps=fps=" + HLS_RATE);
+
+//            if (desiredVCodec != VideoCodec.SOURCE) {
+//                command.add("-vf", "fps=fps=" + HLS_RATE); 
+//            }
+
             command.add("-hls_playlist_type", "event");
             command.add("-hls_flags", "+append_list");
             command.add(new File(targetFile, "media.m3u8").getCanonicalPath());
