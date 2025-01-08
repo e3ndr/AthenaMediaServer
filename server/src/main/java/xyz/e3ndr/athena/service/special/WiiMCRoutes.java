@@ -1,5 +1,6 @@
 package xyz.e3ndr.athena.service.special;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import co.casterlabs.rhs.protocol.StandardHttpStatus;
@@ -40,24 +41,20 @@ class WiiMCRoutes implements HttpProvider {
     }
 
     private static String generatePlaylistForMedia(String host, List<Media> mediaList) {
-        StringBuilder playlistResponse = new StringBuilder();
-        playlistResponse.append("[Playlist]\r\n");
+        List<String> playlistResponse = new LinkedList<>();
+        playlistResponse.add("#EXTM3U");
 
-        int idx = 1;
         for (Media media : mediaList) {
             String url = String.format(
-                "http://%s/_internal/media/%s/stream/raw?quality=SD&format=MKV&videoCodec=H264&audioCodec=AAC",
+                "http://%s/_internal/media/%s/stream/raw?quality=SD&format=MKV&videoCodec=H264_BASELINE&audioCodec=AAC&subtitleCodec=ASS",
                 host, media.getId()
             );
 
-            playlistResponse.append(String.format("File%d=%s\r\n", idx, url));
-            playlistResponse.append(String.format("Title%d=%s\r\n", idx, media.toString()));
-            playlistResponse.append(String.format("Length%d=0\r\n", idx));
-            playlistResponse.append("\r\n");
-            idx++;
+            playlistResponse.add(String.format("#EXTINF:-1=\"%s\",%s", media.getFiles().getImages().getPosterUrl(), media.toString()));
+            playlistResponse.add(url);
         }
 
-        return playlistResponse.toString();
+        return String.join("\r\n", playlistResponse);
     }
 
 }

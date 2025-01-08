@@ -8,7 +8,7 @@ public enum SubtitleCodec {
 
     // @formatter:off
     WEBVTT ("webvtt"),
-    STR    ("srt"),
+    SRT    ("srt"),
     ASS    ("ass"),
     // @formatter:on
     ;
