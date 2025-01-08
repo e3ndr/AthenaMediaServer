@@ -94,11 +94,6 @@ public class Transcoder {
             command.add("-map", String.format("0:%d", streamId));
         }
 
-        // Include all subtitles that we support.
-        for (SubtitleStream subtitle : media.getFiles().getStreams().getSubtitles()) {
-            command.add("-map", String.format("0:%d", subtitle.getId()));
-        }
-
         /* ---- Audio ---- */
         command.add(FFMpegArgs.a_getFF(desiredACodec));
 
@@ -107,7 +102,14 @@ public class Transcoder {
         }
 
         /* ---- Subtitles ---- */
-        command.add(FFMpegArgs.s_getFF(desiredSCodec));
+        if (desiredContainer == ContainerFormat.MKV || desiredContainer == ContainerFormat.MP4) {
+            // Include all subtitles that we support.
+            for (SubtitleStream subtitle : media.getFiles().getStreams().getSubtitles()) {
+                command.add("-map", String.format("0:%d", subtitle.getId()));
+            }
+
+            command.add(FFMpegArgs.s_getFF(desiredSCodec));
+        }
 
         /* ---- Video ---- */
         command.add(FFMpegArgs.v_getFF(desiredVCodec, desiredQuality));
