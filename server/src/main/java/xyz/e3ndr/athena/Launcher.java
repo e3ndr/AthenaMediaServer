@@ -10,6 +10,7 @@ import co.casterlabs.sora.SoraFramework;
 import xyz.e3ndr.athena.service.ftp.AthenaFtpService;
 import xyz.e3ndr.athena.service.http.AthenaHttpService;
 import xyz.e3ndr.athena.service.simple_ui.AthenaSimpleUIService;
+import xyz.e3ndr.athena.service.special.AthenaSpecialService;
 import xyz.e3ndr.athena.transcoding.accelerator.TranscodeAcceleration;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
@@ -69,6 +70,10 @@ public class Launcher {
 
         if (Athena.config.services.simpleUI.enable) {
             AsyncTask.createNonDaemon(() -> new AthenaSimpleUIService().init());
+        }
+
+        if (Athena.config.services.special.enable) {
+            AsyncTask.createNonDaemon(() -> new AthenaSpecialService().init());
         }
     }
 

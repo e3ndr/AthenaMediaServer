@@ -17,7 +17,7 @@ public class AthenaSpecialService implements AthenaService {
     @Override
     public void init() {
         try {
-            int port = Athena.config.services.http.port;
+            int port = Athena.config.services.special.port;
 
             SoraFramework framework = new SoraLauncher()
                 .setPort(port)
